@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>{{ basic_info.name }} · 个人简历</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 210mm; min-height: 297mm;
+    font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, sans-serif;
+    color: #2b2b2b;
+    background: #fff;
+    font-size: 10pt;
+    line-height: 1.65;
+    display: flex;
+  }
+  /* 左侧栏 */
+  .sidebar {
+    width: 32%;
+    background: #4a5358;
+    color: #e8eaeb;
+    padding: 28px 22px;
+  }
+  .photo {
+    width: 110px; height: 140px;
+    background: #2f363a;
+    border: 2px solid #6b7479;
+    border-radius: 4px;
+    margin: 0 auto 18px;
+    display: flex; align-items: center; justify-content: center;
+    color: #9aa3a8; font-size: 10pt;
+  }
+  .name {
+    text-align: center;
+    font-size: 22pt; font-weight: 600;
+    color: #fff;
+    letter-spacing: 4px;
+    margin-bottom: 4px;
+  }
+  .target {
+    text-align: center;
+    font-size: 9.5pt;
+    color: #b6bfc4;
+    margin-bottom: 22px;
+  }
+  .side-section { margin-bottom: 22px; }
+  .side-section-title {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11pt; font-weight: 600;
+    color: #fff;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #6b7479;
+    margin-bottom: 10px;
+  }
+  .side-icon {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #fff;
+    color: #4a5358;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11pt;
+  }
+  .side-info-row {
+    display: flex; align-items: flex-start;
+    margin-bottom: 6px;
+    font-size: 9.5pt;
+  }
+  .side-info-row .ico {
+    width: 18px; flex: none; color: #b6bfc4;
+  }
+  .skill-row { margin-bottom: 10px; }
+  .skill-row .name-row {
+    display: flex; justify-content: space-between;
+    font-size: 9.5pt; margin-bottom: 4px;
+  }
+  .skill-bar {
+    height: 4px;
+    background: #2f363a;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .skill-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #7fb96b, #5da94c);
+  }
+  .strength-list { margin-left: 16px; }
+  .strength-list li { margin-bottom: 4px; font-size: 9.5pt; color: #d8dde0; }
+
+  /* 右主区 */
+  .main {
+    flex: 1;
+    padding: 32px 28px;
+    background: #fff;
+  }
+  .main-section { margin-bottom: 22px; }
+  .main-section-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13pt; font-weight: 600;
+    color: #1a1a1a;
+    padding-bottom: 6px;
+    border-bottom: 1.5px solid #e0e0e0;
+    margin-bottom: 12px;
+  }
+  .main-icon {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: #5da94c;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12pt;
+  }
+  .main-section-title .en {
+    font-size: 9pt; color: #999; font-weight: 400; letter-spacing: 1px; margin-left: 4px;
+  }
+  .item { margin-bottom: 12px; }
+  .item-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 4px;
+  }
+  .item-title { font-weight: 600; font-size: 10.5pt; color: #1a1a1a; }
+  .item-date { color: #777; font-size: 9.5pt; }
+  .item-sub { color: #555; font-size: 9.5pt; }
+  ul.bullets { margin-left: 18px; }
+  ul.bullets li { font-size: 9.5pt; margin-bottom: 3px; color: #333; }
+  .accent { color: #5da94c; font-weight: 600; }
+  .desc { font-size: 9.5pt; color: #333; }
+</style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="photo">照片</div>
+    <div class="name">{{ basic_info.name }}</div>
+    {% if basic_info.objective %}<div class="target">求职意向：{{ basic_info.objective }}</div>{% endif %}
+
+    <div class="side-section">
+      <div class="side-section-title"><span class="side-icon">i</span>基本信息</div>
+      <div class="side-info-row"><span class="ico">⚥</span>{% if basic_info.gender %}{{ basic_info.gender }}{% endif %}{% if basic_info.gender and basic_info.location %} ｜ {% endif %}{% if basic_info.location %}{{ basic_info.location }}{% endif %}</div>
+      {% if basic_info.phone %}<div class="side-info-row"><span class="ico">☎</span>{{ basic_info.phone }}</div>{% endif %}
+      {% if basic_info.email %}<div class="side-info-row"><span class="ico">✉</span>{{ basic_info.email }}</div>{% endif %}
+    </div>
+
+    <div class="side-section">
+      <div class="side-section-title"><span class="side-icon">★</span>软件技能</div>
+      <div class="skill-row">
+        <div class="name-row"><span>Photoshop</span><span>90%</span></div>
+        <div class="skill-bar"><div class="skill-fill" style="width:90%"></div></div>
+      </div>
+      <div class="skill-row">
+        <div class="name-row"><span>Illustrator</span><span>85%</span></div>
+        <div class="skill-bar"><div class="skill-fill" style="width:85%"></div></div>
+      </div>
+      <div class="skill-row">
+        <div class="name-row"><span>InDesign</span><span>80%</span></div>
+        <div class="skill-bar"><div class="skill-fill" style="width:80%"></div></div>
+      </div>
+      <div class="skill-row">
+        <div class="name-row"><span>Teamwork</span><span>95%</span></div>
+        <div class="skill-bar"><div class="skill-fill" style="width:95%"></div></div>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="side-section-title"><span class="side-icon">♥</span>优势特长</div>
+      <ul class="strength-list">
+        <li>写作</li>
+        <li>策划</li>
+        <li>摄影</li>
+        <li>沟通</li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="main">
+    {% if education %}
+    <div class="main-section">
+      <div class="main-section-title">
+        <span class="main-icon">🎓</span>教育背景<span class="en">EDUCATION BACKGROUND</span>
+      </div>
+      {% for edu in education %}
+      <div class="item">
+        <div class="item-header">
+          <span class="item-title">{{ edu.school }}　{{ edu.major }}{% if edu.degree %}（{{ edu.degree }}）{% endif %}</span>
+          <span class="item-date">{{ edu.start_date }}—{{ edu.end_date }}</span>
+        </div>
+        {% if edu.highlights %}<div class="item-sub">主修课程：{{ edu.highlights }}</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if work_experience %}
+    <div class="main-section">
+      <div class="main-section-title">
+        <span class="main-icon">💼</span>实习经历<span class="en">WORK EXPERIENCE</span>
+      </div>
+      {% for job in work_experience %}
+      <div class="item">
+        <div class="item-header">
+          <span class="item-title">{{ job.company }}　{{ job.title }}</span>
+          <span class="item-date">{{ job.start_date }}—{{ job.end_date }}</span>
+        </div>
+        {% if job.bullets %}
+        <ul class="bullets">
+          {% for b in job.bullets %}<li>{{ b }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if projects %}
+    <div class="main-section">
+      <div class="main-section-title">
+        <span class="main-icon">🏫</span>校园经历<span class="en">EXPERIENCE IN COLLEGE</span>
+      </div>
+      {% for p in projects %}
+      <div class="item">
+        <div class="item-header">
+          <span class="item-title">{{ p.name }}{% if p.role %}　{{ p.role }}{% endif %}</span>
+          <span class="item-date">{{ p.start_date }}—{{ p.end_date }}</span>
+        </div>
+        {% if p.description %}
+        <ul class="bullets">
+          <li>{{ p.description }}</li>
+        </ul>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if skills %}
+    <div class="main-section">
+      <div class="main-section-title">
+        <span class="main-icon">★</span>技能证书<span class="en">PROFESSIONAL SKILLS</span>
+      </div>
+      <ul class="bullets">
+        {% for s in skills %}<li>{{ s }}</li>{% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    {% if self_evaluation %}
+    <div class="main-section">
+      <div class="main-section-title">
+        <span class="main-icon">✎</span>自我评价<span class="en">SELF-EVALUATION</span>
+      </div>
+      <p class="desc">{{ self_evaluation }}</p>
+    </div>
+    {% endif %}
+  </main>
+</body>
+</html>

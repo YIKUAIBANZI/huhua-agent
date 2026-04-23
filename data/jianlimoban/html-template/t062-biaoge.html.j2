@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>{{ basic_info.name }} · 个人简历</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 210mm; min-height: 297mm;
+    padding: 14mm 14mm;
+    font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, sans-serif;
+    color: #1f1f1f;
+    background: #fff;
+    font-size: 10pt;
+    line-height: 1.6;
+  }
+  h1 {
+    text-align: center;
+    font-size: 20pt; font-weight: 600;
+    margin-bottom: 14px;
+    letter-spacing: 4px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1.5px solid #2b2b2b;
+  }
+  td {
+    border: 1px solid #2b2b2b;
+    padding: 8px 10px;
+    vertical-align: top;
+    font-size: 10pt;
+  }
+  .label {
+    width: 70px;
+    background: #f5f5f5;
+    text-align: center;
+    font-weight: 600;
+    color: #1a1a1a;
+    vertical-align: middle;
+  }
+  .label-section {
+    width: 60px;
+    background: #f5f5f5;
+    text-align: center;
+    font-weight: 600;
+    color: #1a1a1a;
+    vertical-align: middle;
+    line-height: 1.4;
+  }
+  .photo-cell {
+    width: 90px;
+    text-align: center;
+    background: #e8e8e8;
+    color: #888;
+    font-size: 9pt;
+    vertical-align: middle;
+  }
+  .content-cell { padding: 10px 12px; }
+  .item { margin-bottom: 8px; }
+  .item:last-child { margin-bottom: 0; }
+  .item-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 2px;
+  }
+  .item-title { font-weight: 600; }
+  .item-date { color: #666; font-size: 9.5pt; }
+  ul { margin: 4px 0 0 18px; }
+  li { font-size: 9.5pt; margin-bottom: 2px; }
+  .accent { color: #c0392b; font-weight: 600; }
+</style>
+</head>
+<body>
+  <h1>个人简历</h1>
+
+  <table>
+    <tr>
+      <td class="label">姓　名</td>
+      <td>{{ basic_info.name }}</td>
+      <td class="label">出生年月</td>
+      <td>{% if basic_info.birthday %}{{ basic_info.birthday }}{% endif %}</td>
+      <td class="photo-cell" rowspan="4">照片</td>
+    </tr>
+    <tr>
+      <td class="label">民　族</td>
+      <td>{% if basic_info.ethnicity %}{{ basic_info.ethnicity }}{% endif %}</td>
+      <td class="label">政治面貌</td>
+      <td>{% if basic_info.political %}{{ basic_info.political }}{% endif %}</td>
+    </tr>
+    <tr>
+      <td class="label">电　话</td>
+      <td>{% if basic_info.phone %}{{ basic_info.phone }}{% endif %}</td>
+      <td class="label">毕业院校</td>
+      <td>{% if education and education[0].school %}{{ education[0].school }}{% endif %}</td>
+    </tr>
+    <tr>
+      <td class="label">邮　箱</td>
+      <td>{% if basic_info.email %}{{ basic_info.email }}{% endif %}</td>
+      <td class="label">学　历</td>
+      <td>{% if education and education[0].degree %}{{ education[0].degree }}{% endif %}</td>
+    </tr>
+    <tr>
+      <td class="label">住　址</td>
+      <td colspan="4">{% if basic_info.location %}{{ basic_info.location }}{% endif %}</td>
+    </tr>
+    <tr>
+      <td class="label">求职意向</td>
+      <td colspan="4">{% if basic_info.objective %}{{ basic_info.objective }}{% endif %}</td>
+    </tr>
+
+    {% if education %}
+    <tr>
+      <td class="label-section">教育<br>背景</td>
+      <td colspan="4" class="content-cell">
+        {% for edu in education %}
+        <div class="item">
+          <div class="item-header">
+            <span class="item-title">{{ edu.school }} ｜ {{ edu.major }}{% if edu.degree %}（{{ edu.degree }}）{% endif %}</span>
+            <span class="item-date">{{ edu.start_date }} — {{ edu.end_date }}</span>
+          </div>
+          {% if edu.highlights %}
+          <div>主修课程：</div>
+          <ul>
+            <li>{{ edu.highlights }}</li>
+          </ul>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </td>
+    </tr>
+    {% endif %}
+
+    {% if work_experience %}
+    <tr>
+      <td class="label-section">实习<br>经历</td>
+      <td colspan="4" class="content-cell">
+        {% for job in work_experience %}
+        <div class="item">
+          <div class="item-header">
+            <span class="item-title">{{ job.company }} ｜ {{ job.title }}</span>
+            <span class="item-date">{{ job.start_date }} — {{ job.end_date }}</span>
+          </div>
+          {% if job.bullets %}
+          <ul>
+            {% for b in job.bullets %}<li>{{ b }}</li>{% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </td>
+    </tr>
+    {% endif %}
+
+    {% if projects %}
+    <tr>
+      <td class="label-section">校内<br>实践</td>
+      <td colspan="4" class="content-cell">
+        {% for p in projects %}
+        <div class="item">
+          <div class="item-header">
+            <span class="item-title">{{ p.name }}{% if p.role %} ｜ {{ p.role }}{% endif %}</span>
+            <span class="item-date">{{ p.start_date }} — {{ p.end_date }}</span>
+          </div>
+          {% if p.description %}
+          <ul>
+            <li>{{ p.description }}</li>
+          </ul>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </td>
+    </tr>
+    {% endif %}
+
+    {% if skills %}
+    <tr>
+      <td class="label-section">技能<br>证书</td>
+      <td colspan="4" class="content-cell">
+        {% for s in skills %}
+        <div>{{ s }}</div>
+        {% endfor %}
+      </td>
+    </tr>
+    {% endif %}
+
+    {% if self_evaluation %}
+    <tr>
+      <td class="label-section">自我<br>评价</td>
+      <td colspan="4" class="content-cell">
+        {{ self_evaluation }}
+      </td>
+    </tr>
+    {% endif %}
+  </table>
+</body>
+</html>

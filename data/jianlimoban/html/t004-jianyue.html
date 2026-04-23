@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>个人简历 · 顶底深灰条单栏</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 210mm; min-height: 297mm;
+    font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, sans-serif;
+    color: #2b2b2b;
+    background: #fff;
+    font-size: 10pt;
+    line-height: 1.65;
+    display: flex;
+    flex-direction: column;
+  }
+  .top-bar {
+    background: #3a3a3a;
+    height: 10px;
+  }
+  .page-content {
+    flex: 1;
+    padding: 20px 28px 20px;
+  }
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .header-left { flex: 1; }
+  .header-title {
+    font-size: 22pt; font-weight: 300;
+    color: #1a1a1a;
+    letter-spacing: 6px;
+    margin-bottom: 10px;
+  }
+  .header-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 28px;
+    row-gap: 5px;
+  }
+  .h-info-row {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 9.5pt; color: #444;
+  }
+  .h-info-row .lbl {
+    color: #666;
+    min-width: 52px;
+    display: inline-block;
+  }
+  .h-info-row .lbl::after { content: '：'; }
+  .photo {
+    width: 90px; height: 114px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    color: #999; font-size: 9pt;
+    flex: none;
+    margin-left: 20px;
+  }
+  .section { margin-bottom: 14px; }
+  .section-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 11pt; font-weight: 600;
+    color: #1a1a1a;
+    padding: 4px 0 4px 12px;
+    border-left: 4px solid #3a6aaa;
+    margin-bottom: 8px;
+  }
+  .item { margin-bottom: 10px; padding-left: 4px; }
+  .item-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 3px;
+  }
+  .item-title { font-weight: 600; font-size: 10pt; color: #1a1a1a; }
+  .item-date { font-size: 9pt; color: #6a8aaa; }
+  .item-sub { font-size: 9pt; color: #3a6aaa; margin-bottom: 3px; }
+  ul { margin-left: 18px; }
+  li { font-size: 9.5pt; color: #333; margin-bottom: 3px; }
+  .skill-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 28px;
+    row-gap: 4px;
+    padding-left: 4px;
+  }
+  .skill-item { font-size: 9.5pt; color: #333; }
+  .skill-item .lbl { color: #555; min-width: 52px; display: inline-block; }
+  .skill-item .lbl::after { content: '：'; }
+  .desc { font-size: 9.5pt; color: #333; padding-left: 4px; }
+  .bottom-bar {
+    background: #3a3a3a;
+    height: 10px;
+    margin-top: auto;
+  }
+</style>
+</head>
+<body>
+  <div class="top-bar"></div>
+  <div class="page-content">
+    <div class="header">
+      <div class="header-left">
+        <div class="header-title">个人简历</div>
+        <div class="header-info-grid">
+          <div class="h-info-row"><span class="lbl">姓　名</span>胡小豆</div>
+          <div class="h-info-row"><span class="lbl">出生年月</span>1996.06</div>
+          <div class="h-info-row"><span class="lbl">电　话</span>13500000xxx</div>
+          <div class="h-info-row"><span class="lbl">民　族</span>汉</div>
+          <div class="h-info-row"><span class="lbl">邮　箱</span>000xxx@xx.com</div>
+          <div class="h-info-row"><span class="lbl">政治面貌</span>群众</div>
+          <div class="h-info-row"><span class="lbl">地　址</span>广东省广州市南海区江北工业区</div>
+          <div class="h-info-row"><span class="lbl">学　历</span>本科</div>
+        </div>
+      </div>
+      <div class="photo">照片</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">教育背景</div>
+      <div class="item">
+        <div class="item-header">
+          <span class="item-title">胡话大学　XX设计大学</span>
+          <span class="item-date">20xx.07 — 20xx.06</span>
+        </div>
+        <div class="item-sub">市场营销（本科）</div>
+        <ul>
+          <li>管理学、微观经济学、宏观经济学、管理信息系统、统计学、会计学、财务管理、市场营销、经济法、消费者行为学、国际市场营销</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">校内实践</div>
+      <div class="item">
+        <div class="item-header">
+          <span class="item-title">20xx.03 — 20xx.06　广州 XX 设计信息有限公司</span>
+          <span class="item-date">校内大文案</span>
+        </div>
+        <ul>
+          <li>负责公司重要项目的招投标工作（如开标专项工作），公司重要客户接洽，重要工程、合同、采购、招标等。AAA 美德公司拟订工作计划、统计汇总各地区报表，辅助处理相关事务。</li>
+          <li>做好会议记录的工作、根据学校所有在读学生的 AAA 数据，为各相关学生和教职工信息管理相关工作；根据投递行业上市公司信息，提高了行业 AAA 数据统计工作效率。</li>
+        </ul>
+      </div>
+      <div class="item">
+        <div class="item-header">
+          <span class="item-title">20xx.07 — 20xx.09　XX 设计创意有限公司</span>
+          <span class="item-date">初级经济协会会长</span>
+        </div>
+        <ul>
+          <li>在实习期间，对互联网保持高度的敏感性和关注度，用于发展和提高学生的知识和技能，帮助学生建立有效的人脉关系；协助创新创业学院文件准备工作，提高了文件的准确率。</li>
+          <li>积极参与了公司各项业务的流程优化，对超过了对其他年级学生的教育引导工作有了更多的了解。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">实习经历</div>
+      <div class="item">
+        <div class="item-header">
+          <span class="item-title">20xx.04 — 杭州某广东信息技术有限公司</span>
+          <span class="item-date">市场营销（实习生）</span>
+        </div>
+        <ul>
+          <li>负责公司重要项目的招投标工作（如开标专项工作），公司重要客户接洽，重要工程、合同、采购、招标等。</li>
+          <li>实施了部分企业事项，根据政府相关文件准备文档，为客户和文档的整理与维护提供了重要支持，节约时间成本约 30%。</li>
+          <li>协助完成数据分析报告，定期整理汇报市场调研成果，为业务决策提供数据支撑。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">技能证书</div>
+      <div class="skill-grid">
+        <div class="skill-item"><span class="lbl">英语水平</span>大学英语六级（CET-6）</div>
+        <div class="skill-item"><span class="lbl">办公技能</span>熟练使用 Office 全家桶</div>
+        <div class="skill-item"><span class="lbl">专业认证</span>持有相关专业资格证书</div>
+        <div class="skill-item"><span class="lbl">其　他</span>具备良好的英语口语表达能力</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">自我评价</div>
+      <p class="desc">深度互联网从业人员，对互联网保持高度的敏感性和关注度；熟悉产品开发流程，有项目交付的经验，能积极参与产品规划、需求分析、交互设计能力，能独立承担 APP 和 WEB 项目的管控工作，善于沟通，贴近用户。</p>
+    </div>
+  </div>
+  <div class="bottom-bar"></div>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>个人简历 · 浅蓝色块</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 210mm; min-height: 297mm;
+    padding: 14mm 14mm;
+    font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, sans-serif;
+    color: #2b2b2b;
+    background: #fff;
+    font-size: 10pt;
+    line-height: 1.65;
+  }
+  .header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    border-bottom: 3px solid #5b8fb0;
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+  }
+  .title-block .cn { font-size: 28pt; font-weight: 700; color: #1a1a1a; letter-spacing: 4px; }
+  .title-block .en { font-size: 11pt; color: #5b8fb0; letter-spacing: 2px; margin-top: -4px; }
+  .icons { display: flex; gap: 6px; }
+  .icon-circle { width: 22px; height: 22px; border-radius: 50%; background: #5b8fb0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10pt; }
+  .section-title {
+    background: linear-gradient(90deg, #d6e4ee 0%, #e8f1f6 100%);
+    color: #2c5876;
+    padding: 5px 16px 5px 14px;
+    font-size: 11pt; font-weight: 600;
+    margin: 16px 0 10px;
+    border-left: 4px solid #5b8fb0;
+    clip-path: polygon(0 0, 100% 0, 96% 100%, 0 100%);
+    width: fit-content;
+    min-width: 130px;
+  }
+  .info-row { display: flex; gap: 24px; align-items: flex-start; padding: 4px 14px; }
+  .info-grid {
+    flex: 1;
+    display: grid; grid-template-columns: 1fr 1fr;
+    column-gap: 32px; row-gap: 6px;
+  }
+  .info-item .label { color: #555; display: inline-block; min-width: 56px; }
+  .info-item .label::after { content: '：'; }
+  .photo {
+    width: 95px; height: 120px;
+    background: #e8e8e8;
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    color: #aaa; font-size: 9pt;
+    flex: none;
+  }
+  .item { padding: 0 14px; margin-bottom: 12px; }
+  .item-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .item-title { font-weight: 600; color: #1a1a1a; }
+  .item-date { color: #5b8fb0; font-size: 9.5pt; }
+  .item-sub { color: #555; font-size: 9.5pt; }
+  ul { margin-left: 18px; }
+  li { font-size: 9.5pt; margin-bottom: 3px; color: #333; }
+  .desc { font-size: 9.5pt; color: #333; padding: 0 14px; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="title-block">
+      <div class="cn">个人简历</div>
+      <div class="en">— 一个人 一份计划 — Personal resume</div>
+    </div>
+    <div class="icons">
+      <span class="icon-circle">✉</span>
+      <span class="icon-circle">☎</span>
+      <span class="icon-circle">i</span>
+    </div>
+  </div>
+
+  <div class="section-title">基本信息</div>
+  <div class="info-row">
+    <div class="info-grid">
+      <div class="info-item"><span class="label">姓　名</span>胡小豆</div>
+      <div class="info-item"><span class="label">出生年月</span>20xx.05</div>
+      <div class="info-item"><span class="label">民　族</span>汉</div>
+      <div class="info-item"><span class="label">身　高</span>167cm</div>
+      <div class="info-item"><span class="label">电　话</span>138xxxxxxxx</div>
+      <div class="info-item"><span class="label">毕业院校</span>胡话简历大学</div>
+      <div class="info-item"><span class="label">邮　箱</span>xxxxx@xx.com</div>
+      <div class="info-item"><span class="label">学　历</span>本科</div>
+    </div>
+    <div class="photo">照片</div>
+  </div>
+
+  <div class="section-title">教育背景</div>
+  <div class="item">
+    <div class="item-header">
+      <span class="item-title">胡话简历大学　设计科技专业（本科）</span>
+      <span class="item-date">20xx.07—20xx.05</span>
+    </div>
+    <div class="item-sub">主修课程：</div>
+    <ul>
+      <li>视觉传达、品牌设计、用户体验、交互设计、设计软件、字体设计、版式设计、商业插画。</li>
+    </ul>
+  </div>
+
+  <div class="section-title">实习经历</div>
+  <div class="item">
+    <div class="item-header">
+      <span class="item-title">胡话简历大学　实习生（实习）</span>
+      <span class="item-date">20xx.04—20xx.06</span>
+    </div>
+    <ul>
+      <li>负责公司重要项目的招投标工作（如开标专项工作），公司重要客户接洽，重要工程、合同、采购、招标等。</li>
+      <li>实施了部分企业事项，根据政府相关文件准备文档，为客户和文档的整理与维护提供了重要支持。</li>
+    </ul>
+  </div>
+
+  <div class="section-title">校园经历</div>
+  <div class="item">
+    <div class="item-header">
+      <span class="item-title">胡话简历大学　校园社团负责人</span>
+      <span class="item-date">20xx.09—20xx.06</span>
+    </div>
+    <ul>
+      <li>组织策划AAA社团各项活动20余场，辅助主席日常工作并执行各项决议。</li>
+      <li>带领班级在学校组织的各项比赛中获得优秀奖项，组织策划比赛活动6场。</li>
+    </ul>
+  </div>
+
+  <div class="section-title">技能证书</div>
+  <div class="item">
+    <ul>
+      <li>大学英语六级（CET-6）：良好的听说读写能力、快速阅读英语专业文献及书籍。</li>
+      <li>通过全国计算机二级考试，熟练运用 Office 全家桶。</li>
+    </ul>
+  </div>
+
+  <div class="section-title">自我评价</div>
+  <p class="desc">深度互联网从业人员，对互联网保持高度的敏感性和关注度；熟悉产品开发流程，有项目交付的经验，能积极参与产品策划、文档输出工作；交流沟通能力强，能配合多端 APP 和 WEB 项目的需求方进行沟通，善于发现问题、解决问题。</p>
+</body>
+</html>

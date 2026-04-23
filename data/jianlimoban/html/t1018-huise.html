@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>个人简历 · 灰色双栏</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 210mm; min-height: 297mm;
+    font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, sans-serif;
+    color: #2b2b2b;
+    background: #fff;
+    font-size: 10pt;
+    line-height: 1.65;
+    display: flex;
+  }
+  /* 左侧栏 */
+  .sidebar {
+    width: 32%;
+    background: #4a5358;
+    color: #e8eaeb;
+    padding: 28px 22px;
+  }
+  .photo {
+    width: 110px; height: 140px;
+    background: #2f363a;
+    border: 2px solid #6b7479;
+    border-radius: 4px;
+    margin: 0 auto 18px;
+    display: flex; align-items: center; justify-content: center;
+    color: #9aa3a8; font-size: 10pt;
+  }
+  .name {
+    text-align: center;
+    font-size: 22pt; font-weight: 600;
+    color: #fff;
+    letter-spacing: 4px;
+    margin-bottom: 4px;
+  }
+  .target {
+    text-align: center;
+    font-size: 9.5pt;
+    color: #b6bfc4;
+    margin-bottom: 22px;
+  }
+  .side-section { margin-bottom: 22px; }
+  .side-section-title {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11pt; font-weight: 600;
+    color: #fff;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #6b7479;
+    margin-bottom: 10px;
+  }
+  .side-icon {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #fff;
+    color: #4a5358;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11pt;
+  }
+  .side-info-row {
+    display: flex; align-items: flex-start;
+    margin-bottom: 6px;
+    font-size: 9.5pt;
+  }
+  .side-info-row .ico {
+    width: 18px; flex: none; color: #b6bfc4;
+  }
+  .skill-row { margin-bottom: 10px; }
+  .skill-row .name-row {
+    display: flex; justify-content: space-between;
+    font-size: 9.5pt; margin-bottom: 4px;
+  }
+  .skill-bar {
+    height: 4px;
+    background: #2f363a;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .skill-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #7fb96b, #5da94c);
+  }
+  .strength-list { margin-left: 16px; }
+  .strength-list li { margin-bottom: 4px; font-size: 9.5pt; color: #d8dde0; }
+
+  /* 右主区 */
+  .main {
+    flex: 1;
+    padding: 32px 28px;
+    background: #fff;
+  }
+  .main-section { margin-bottom: 22px; }
+  .main-section-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13pt; font-weight: 600;
+    color: #1a1a1a;
+    padding-bottom: 6px;
+    border-bottom: 1.5px solid #e0e0e0;
+    margin-bottom: 12px;
+  }
+  .main-icon {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: #5da94c;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12pt;
+  }
+  .main-section-title .en {
+    font-size: 9pt; color: #999; font-weight: 400; letter-spacing: 1px; margin-left: 4px;
+  }
+  .item { margin-bottom: 12px; }
+  .item-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 4px;
+  }
+  .item-title { font-weight: 600; font-size: 10.5pt; color: #1a1a1a; }
+  .item-date { color: #777; font-size: 9.5pt; }
+  .item-sub { color: #555; font-size: 9.5pt; }
+  ul.bullets { margin-left: 18px; }
+  ul.bullets li { font-size: 9.5pt; margin-bottom: 3px; color: #333; }
+  .accent { color: #5da94c; font-weight: 600; }
+  .desc { font-size: 9.5pt; color: #333; }
+</style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="photo">照片</div>
+    <div class="name">胡小豆</div>
+    <div class="target">求职意向：市场运营专员</div>
+
+    <div class="side-section">
+      <div class="side-section-title"><span class="side-icon">i</span>基本信息</div>
+      <div class="side-info-row"><span class="ico">⚥</span>女 ｜ 广州</div>
+      <div class="side-info-row"><span class="ico">☎</span>138xxxxxxxx</div>
+      <div class="side-info-row"><span class="ico">✉</span>xxxxx@xx.com</div>
+    </div>
+
+    <div class="side-section">
+      <div class="side-section-title"><span class="side-icon">★</span>软件技能</div>
+      <div class="skill-row">
+        <div class="name-row"><span>Photoshop</span><span>90%</span></div>
+        <div class="skill-bar"><div class="skill-fill" style="width:90%"></div></div>
+      </div>
+      <div class="skill-row">
+        <div class="name-row"><span>Illustrator</span><span>85%</span></div>
+        <div class="skill-bar"><div class="skill-fill" style="width:85%"></div></div>
+      </div>
+      <div class="skill-row">
+        <div class="name-row"><span>InDesign</span><span>80%</span></div>
+        <div class="skill-bar"><div class="skill-fill" style="width:80%"></div></div>
+      </div>
+      <div class="skill-row">
+        <div class="name-row"><span>Teamwork</span><span>95%</span></div>
+        <div class="skill-bar"><div class="skill-fill" style="width:95%"></div></div>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="side-section-title"><span class="side-icon">♥</span>优势特长</div>
+      <ul class="strength-list">
+        <li>写作</li>
+        <li>策划</li>
+        <li>摄影</li>
+        <li>沟通</li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="main-section">
+      <div class="main-section-title">
+        <span class="main-icon">🎓</span>教育背景<span class="en">EDUCATION BACKGROUND</span>
+      </div>
+      <div class="item">
+        <div class="item-header">
+          <span class="item-title">中山科技大学　本科生（本科）</span>
+          <span class="item-date">20xx.07—20xx.05</span>
+        </div>
+        <div class="item-sub">主修课程：宏观经济学、微观经济学、管理学原理、统计学、会计学、市场营销学</div>
+      </div>
+    </div>
+
+    <div class="main-section">
+      <div class="main-section-title">
+        <span class="main-icon">💼</span>实习经历<span class="en">WORK EXPERIENCE</span>
+      </div>
+      <div class="item">
+        <div class="item-header">
+          <span class="item-title">胡话简历大学　实习生（实习）</span>
+          <span class="item-date">20xx.04—20xx.06</span>
+        </div>
+        <ul class="bullets">
+          <li>负责公司重要项目的招投标工作（如开标专项工作），公司重要客户接洽，重要工程、合同、采购、招标等。</li>
+          <li>实施了部分企业事项，根据政府相关文件准备文档，为客户和文档的整理与维护提供了重要支持，节约成本 <span class="accent">30%</span>。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="main-section">
+      <div class="main-section-title">
+        <span class="main-icon">🏫</span>校园经历<span class="en">EXPERIENCE IN COLLEGE</span>
+      </div>
+      <div class="item">
+        <div class="item-header">
+          <span class="item-title">胡话简历大学　校园社团负责人</span>
+          <span class="item-date">20xx.09—20xx.06</span>
+        </div>
+        <ul class="bullets">
+          <li>组织策划AAA社团各项活动20余场，辅助主席日常工作并执行各项决议，覆盖学生 <span class="accent">2000+</span> 人次。</li>
+          <li>带领班级在学校组织的各项比赛中获得优秀奖项，组织策划比赛活动6场。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="main-section">
+      <div class="main-section-title">
+        <span class="main-icon">★</span>技能证书<span class="en">PROFESSIONAL SKILLS</span>
+      </div>
+      <ul class="bullets">
+        <li>大学英语六级（CET-6）：良好的听说读写能力、快速阅读英语专业文献及书籍。</li>
+        <li>通过全国计算机二级考试，熟练运用 Office 全家桶。</li>
+      </ul>
+    </div>
+
+    <div class="main-section">
+      <div class="main-section-title">
+        <span class="main-icon">✎</span>自我评价<span class="en">SELF-EVALUATION</span>
+      </div>
+      <p class="desc">深度互联网从业人员，对互联网保持高度的敏感性和关注度；熟悉产品开发流程，有项目交付的经验，能积极参与产品策划、文档输出工作；交流沟通能力强，能配合多端 APP 和 WEB 项目的需求方进行沟通，善于发现问题、解决问题。</p>
+    </div>
+  </main>
+</body>
+</html>

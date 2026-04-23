@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>胡话简历 · 模板预览</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #f5f5f5; height: 100vh; display: flex; flex-direction: column;
+         color: #1a1a1a; }
+  #header { background: #5423E7; color: #fff; padding: 12px 24px;
+            font-size: 16px; font-weight: 600; display: flex; justify-content: space-between;
+            align-items: center; }
+  #header a { color: #fff; opacity: .8; text-decoration: none; font-size: 13px; font-weight: 400; }
+  #header a:hover { opacity: 1; }
+  main { flex: 1; display: grid; grid-template-columns: 240px 1fr 380px; gap: 12px;
+         padding: 12px; overflow: hidden; }
+  .panel { background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.06);
+           display: flex; flex-direction: column; overflow: hidden; }
+  .panel-header { padding: 10px 14px; border-bottom: 1px solid #eee;
+                  font-size: 13px; font-weight: 600; color: #333;
+                  display: flex; justify-content: space-between; align-items: center; }
+  .panel-header button { background: #5423E7; color: #fff; border: none; padding: 4px 10px;
+                         border-radius: 4px; font-size: 12px; cursor: pointer; }
+  .panel-header button:hover { opacity: .88; }
+
+  #template-list { overflow-y: auto; flex: 1; padding: 6px; }
+  .tpl-item { padding: 10px 12px; border-radius: 6px; cursor: pointer;
+              border: 1px solid transparent; margin-bottom: 4px; transition: all .15s; }
+  .tpl-item:hover { background: #f5f5f5; }
+  .tpl-item.active { background: #f0ecff; border-color: #5423E7; }
+  .tpl-name { font-size: 13px; font-weight: 600; }
+  .tpl-style { font-size: 11px; color: #888; margin-top: 2px; }
+
+  #preview-frame { flex: 1; border: none; background: #fafafa; }
+
+  #json-editor { flex: 1; padding: 10px 14px; font-family: 'SF Mono', Menlo, monospace;
+                 font-size: 12px; border: none; outline: none; resize: none;
+                 background: #fafafa; color: #222; line-height: 1.5; }
+
+  .err { color: #d33; padding: 12px; font-size: 12px; }
+  .muted { color: #888; font-size: 11px; font-weight: 400; }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <span>胡话简历 · 模板预览</span>
+  <a href="/">← 回到聊天</a>
+</div>
+
+<main>
+  <div class="panel">
+    <div class="panel-header">模板 <span class="muted" id="tpl-count"></span></div>
+    <div id="template-list"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      预览 <span class="muted" id="current-tpl"></span>
+      <span id="export-wrap" style="position:relative;margin-left:auto;">
+        <button id="btn-export">导出 ▾</button>
+        <div id="export-menu" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:#fff;border:1px solid #e0e0e0;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:120px;z-index:10;">
+          <div class="export-opt" data-format="pdf" style="padding:8px 14px;cursor:pointer;font-size:13px;">导出 PDF</div>
+          <div class="export-opt" data-format="docx" style="padding:8px 14px;cursor:pointer;font-size:13px;border-top:1px solid #f0f0f0;">导出 Word (DOCX)</div>
+        </div>
+      </span>
+    </div>
+    <iframe id="preview-frame"></iframe>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      数据（JSON）
+      <label id="btn-upload-photo" style="cursor:pointer;padding:4px 10px;border:1px solid #e0e0e0;border-radius:4px;font-size:12px;margin-left:auto;">
+        📷 头像
+        <input id="photo-input" type="file" accept="image/jpeg,image/png" style="display:none;">
+      </label>
+      <button id="btn-render" style="margin-left:6px;">渲染</button>
+    </div>
+    <textarea id="json-editor" spellcheck="false"></textarea>
+  </div>
+</main>
+
+<script>
+const state = { templates: [], current: null, data: null };
+
+const tplListEl = document.getElementById('template-list');
+const tplCountEl = document.getElementById('tpl-count');
+const currentTplEl = document.getElementById('current-tpl');
+const frameEl = document.getElementById('preview-frame');
+const editorEl = document.getElementById('json-editor');
+const renderBtn = document.getElementById('btn-render');
+
+async function init() {
+  // 优先用 URL 参数 ?session=xxx 指定的 session，否则看 localStorage（聊天页会写入）
+  const urlParams = new URLSearchParams(location.search);
+  const sessionId = urlParams.get('session') || localStorage.getItem('huhua_session_id') || null;
+
+  let resumeData = null;
+  let dataSource = 'sample';
+  if (sessionId) {
+    try {
+      const r = await fetch(`/api/resume/current?session_id=${encodeURIComponent(sessionId)}`);
+      if (r.ok) {
+        const body = await r.json();
+        if (body.has_data && body.data) {
+          resumeData = body.data;
+          dataSource = 'session';
+        }
+      }
+    } catch (e) { /* silently fallback */ }
+  }
+
+  const tplRes = await fetch('/api/resume/templates').then(r => r.json());
+  if (!resumeData) {
+    resumeData = await fetch('/api/resume/sample').then(r => r.json());
+  }
+
+  state.templates = tplRes.templates;
+  state.data = resumeData;
+  editorEl.value = JSON.stringify(resumeData, null, 2);
+
+  // 如果展示的是 sample，给编辑器一个软提示
+  if (dataSource === 'sample' && sessionId) {
+    console.info('[resume] session 还没产出数据，展示 sample。session_id=', sessionId);
+  }
+
+  tplCountEl.textContent = `(${state.templates.length})`;
+  tplListEl.innerHTML = '';
+  state.templates.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'tpl-item';
+    div.dataset.id = t.id;
+    div.innerHTML = `<div class="tpl-name">${t.name}</div><div class="tpl-style">${t.style}</div>`;
+    div.addEventListener('click', () => selectTemplate(t.id));
+    tplListEl.appendChild(div);
+  });
+
+  selectTemplate(state.templates[0].id);
+}
+
+async function selectTemplate(id) {
+  state.current = id;
+  [...tplListEl.children].forEach(el =>
+    el.classList.toggle('active', el.dataset.id === id));
+  const t = state.templates.find(x => x.id === id);
+  currentTplEl.textContent = t ? t.name : id;
+  await renderPreview();
+}
+
+async function renderPreview() {
+  if (!state.current) return;
+  let data;
+  try {
+    data = JSON.parse(editorEl.value);
+  } catch (e) {
+    frameEl.srcdoc = `<p class="err">JSON 解析失败：${e.message}</p>`;
+    return;
+  }
+  try {
+    const res = await fetch(`/api/resume/render/${state.current}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const detail = await res.text();
+      frameEl.srcdoc = `<p style="color:#d33;padding:12px;">渲染失败 (${res.status}): ${detail}</p>`;
+      return;
+    }
+    const html = await res.text();
+    frameEl.srcdoc = html;
+  } catch (e) {
+    frameEl.srcdoc = `<p style="color:#d33;padding:12px;">网络错误: ${e.message}</p>`;
+  }
+}
+
+renderBtn.addEventListener('click', renderPreview);
+
+// ── 上传头像：文件 → base64 → 写入 JSON editor.basic_info.photo → 触发重渲染 ──
+const photoInput = document.getElementById('photo-input');
+photoInput.addEventListener('change', async e => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    alert('图片超过 5MB，请压缩后再上传');
+    photoInput.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const dataUrl = reader.result; // data:image/jpeg;base64,...
+    let data;
+    try { data = JSON.parse(editorEl.value); }
+    catch (err) { alert('当前 JSON 解析失败，先修一下再上传头像'); return; }
+    if (!data.basic_info) data.basic_info = {};
+    data.basic_info.photo = dataUrl;
+    editorEl.value = JSON.stringify(data, null, 2);
+    renderPreview();
+  };
+  reader.onerror = () => alert('读取图片失败');
+  reader.readAsDataURL(file);
+  photoInput.value = '';
+});
+
+// ── 导出按钮（PDF 走浏览器打印 / DOCX 走后端接口）─────────────
+const exportBtn = document.getElementById('btn-export');
+const exportMenu = document.getElementById('export-menu');
+exportBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  exportMenu.style.display = exportMenu.style.display === 'block' ? 'none' : 'block';
+});
+document.addEventListener('click', () => { exportMenu.style.display = 'none'; });
+
+function getCurrentData() {
+  try { return JSON.parse(editorEl.value); }
+  catch (e) { alert('JSON 格式有误：' + e.message); return null; }
+}
+
+document.querySelectorAll('.export-opt').forEach(el => {
+  el.addEventListener('click', async e => {
+    e.stopPropagation();
+    exportMenu.style.display = 'none';
+    if (!state.current) { alert('请先选择一款模板'); return; }
+    const data = getCurrentData();
+    if (!data) return;
+    const fmt = el.dataset.format;
+
+    if (fmt === 'pdf') {
+      // 渲染到新窗口 + 自动调起打印对话框（用户另存为 PDF）
+      const res = await fetch(`/api/resume/render/${state.current}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) { alert('渲染失败：' + await res.text()); return; }
+      const html = await res.text();
+      const w = window.open('', '_blank');
+      if (!w) { alert('浏览器拦截了新窗口，请允许弹窗'); return; }
+      // 注入自动打印脚本
+      const injected = html.replace(
+        '</body>',
+        '<script>window.addEventListener("load", () => setTimeout(() => window.print(), 300));<\/script></body>'
+      );
+      w.document.open();
+      w.document.write(injected);
+      w.document.close();
+    } else if (fmt === 'docx') {
+      const res = await fetch(`/api/resume/export/docx/${state.current}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) { alert('导出失败：' + await res.text()); return; }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const cd = res.headers.get('Content-Disposition') || '';
+      const m = cd.match(/filename\*=UTF-8''([^;]+)/);
+      a.href = url;
+      a.download = m ? decodeURIComponent(m[1]) : `简历-${state.current}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+  });
+});
+
+init();
+</script>
+</body>
+</html>

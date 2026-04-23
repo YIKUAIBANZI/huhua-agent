@@ -1,0 +1,2137 @@
+{
+  "total": 148,
+  "summary": {
+    "A": 0,
+    "B": 104,
+    "C": 38,
+    "F": 6
+  },
+  "results": [
+    {
+      "id": "单页001-简约",
+      "detected_labels": [
+        "专业",
+        "毕业院校",
+        "政治面貌",
+        "院校",
+        "出生年月",
+        "姓    名"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 95,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页002-简约",
+      "detected_labels": [
+        "专业",
+        "毕业院校",
+        "政治面貌",
+        "院校",
+        "出生年月",
+        "姓    名"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 284,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页003-简约",
+      "detected_labels": [
+        "专业",
+        "毕业院校",
+        "政治面貌",
+        "院校",
+        "出生年月",
+        "姓    名"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 165,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页004-简约",
+      "detected_labels": [
+        "专业",
+        "政治面貌",
+        "毕业院校",
+        "院校",
+        "出生年月"
+      ],
+      "label_count": 5,
+      "fields_replaced": 0,
+      "output_size_kb": 56,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页005-简约",
+      "detected_labels": [
+        "专业"
+      ],
+      "label_count": 1,
+      "fields_replaced": 1,
+      "output_size_kb": 73,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页006-简约",
+      "detected_labels": [
+        "专业"
+      ],
+      "label_count": 1,
+      "fields_replaced": 1,
+      "output_size_kb": 80,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页007-简约",
+      "detected_labels": [
+        "专业",
+        "政治面貌",
+        "邮箱",
+        "求职意向",
+        "电话"
+      ],
+      "label_count": 5,
+      "fields_replaced": 1,
+      "output_size_kb": 112,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页008-简约",
+      "detected_labels": [
+        "学位"
+      ],
+      "label_count": 1,
+      "fields_replaced": 0,
+      "output_size_kb": 84,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页009-简约",
+      "detected_labels": [
+        "邮箱",
+        "电话",
+        "专业",
+        "求职意向"
+      ],
+      "label_count": 4,
+      "fields_replaced": 1,
+      "output_size_kb": 148,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页010-简约",
+      "detected_labels": [
+        "邮箱",
+        "电话",
+        "专业",
+        "求职意向"
+      ],
+      "label_count": 4,
+      "fields_replaced": 1,
+      "output_size_kb": 145,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页011-简约",
+      "detected_labels": [
+        "专业",
+        "求职意向"
+      ],
+      "label_count": 2,
+      "fields_replaced": 1,
+      "output_size_kb": 82,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页012-简约",
+      "detected_labels": [
+        "学位",
+        "政治面貌",
+        "联系电话",
+        "毕业院校",
+        "院校",
+        "学校",
+        "出生年月",
+        "电话",
+        "姓    名"
+      ],
+      "label_count": 9,
+      "fields_replaced": 1,
+      "output_size_kb": 71,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页013-简约",
+      "detected_labels": [
+        "求职意向"
+      ],
+      "label_count": 1,
+      "fields_replaced": 1,
+      "output_size_kb": 152,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页014-简约",
+      "detected_labels": [
+        "专业"
+      ],
+      "label_count": 1,
+      "fields_replaced": 0,
+      "output_size_kb": 81,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页015-简约",
+      "detected_labels": [
+        "专业"
+      ],
+      "label_count": 1,
+      "fields_replaced": 1,
+      "output_size_kb": 68,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页016-简约",
+      "detected_labels": [
+        "专业",
+        "政治面貌",
+        "毕业院校",
+        "院校",
+        "出生年月",
+        "求职意向"
+      ],
+      "label_count": 6,
+      "fields_replaced": 0,
+      "output_size_kb": 45,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页017-简约",
+      "detected_labels": [
+        "专业",
+        "政治面貌",
+        "毕业院校",
+        "院校",
+        "出生年月",
+        "求职意向"
+      ],
+      "label_count": 6,
+      "fields_replaced": 0,
+      "output_size_kb": 43,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页018-简约",
+      "detected_labels": [
+        "地址",
+        "邮箱",
+        "电话",
+        "求职意向"
+      ],
+      "label_count": 4,
+      "fields_replaced": 1,
+      "output_size_kb": 76,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页019-简约",
+      "detected_labels": [
+        "手机",
+        "邮箱",
+        "专业",
+        "求职意向"
+      ],
+      "label_count": 4,
+      "fields_replaced": 1,
+      "output_size_kb": 102,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页020-简约灰",
+      "detected_labels": [
+        "专业",
+        "学校"
+      ],
+      "label_count": 2,
+      "fields_replaced": 1,
+      "output_size_kb": 149,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页021-简约",
+      "detected_labels": [
+        "专业",
+        "求职意向"
+      ],
+      "label_count": 2,
+      "fields_replaced": 1,
+      "output_size_kb": 92,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页022-简约",
+      "detected_labels": [
+        "手机",
+        "邮箱",
+        "求职意向",
+        "地址",
+        "姓    名"
+      ],
+      "label_count": 5,
+      "fields_replaced": 1,
+      "output_size_kb": 72,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页023-简约",
+      "detected_labels": [
+        "手机",
+        "专业",
+        "政治面貌",
+        "毕业院校",
+        "院校",
+        "手机号码",
+        "学校",
+        "出生年月",
+        "求职意向"
+      ],
+      "label_count": 9,
+      "fields_replaced": 1,
+      "output_size_kb": 94,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页024-简约",
+      "detected_labels": [
+        "出生年月",
+        "求职意向",
+        "民族"
+      ],
+      "label_count": 3,
+      "fields_replaced": 0,
+      "output_size_kb": 89,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页025-简约",
+      "detected_labels": [
+        "专业",
+        "出生年月",
+        "求职意向",
+        "政治面貌"
+      ],
+      "label_count": 4,
+      "fields_replaced": 1,
+      "output_size_kb": 75,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页026-简约",
+      "detected_labels": [
+        "邮箱",
+        "电话",
+        "专业",
+        "求职意向"
+      ],
+      "label_count": 4,
+      "fields_replaced": 1,
+      "output_size_kb": 215,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页027-极简无照片",
+      "detected_labels": [
+        "专业",
+        "求职意向",
+        "学校"
+      ],
+      "label_count": 3,
+      "fields_replaced": 0,
+      "output_size_kb": 15,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页028-极简有照片",
+      "detected_labels": [
+        "Email",
+        "电话",
+        "年龄"
+      ],
+      "label_count": 3,
+      "fields_replaced": 0,
+      "output_size_kb": 128,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页029-极简有照片",
+      "detected_labels": [],
+      "label_count": 0,
+      "fields_replaced": 0,
+      "output_size_kb": 129,
+      "error": null,
+      "grade": "F"
+    },
+    {
+      "id": "单页030-极简有照片",
+      "detected_labels": [
+        "专业",
+        "邮箱",
+        "求职意向",
+        "地址",
+        "电话"
+      ],
+      "label_count": 5,
+      "fields_replaced": 0,
+      "output_size_kb": 225,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页031-简约",
+      "detected_labels": [
+        "专业",
+        "毕业院校",
+        "政治面貌",
+        "院校",
+        "求职意向",
+        "出生日期"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 135,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页032-简约",
+      "detected_labels": [
+        "专业",
+        "年龄",
+        "邮箱",
+        "求职意向",
+        "地址",
+        "电话"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 66,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页033-简约",
+      "detected_labels": [],
+      "label_count": 0,
+      "fields_replaced": 0,
+      "output_size_kb": 78,
+      "error": null,
+      "grade": "F"
+    },
+    {
+      "id": "单页034-简约蓝",
+      "detected_labels": [
+        "专业",
+        "求职意向"
+      ],
+      "label_count": 2,
+      "fields_replaced": 1,
+      "output_size_kb": 79,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页035-简约",
+      "detected_labels": [
+        "电子邮箱",
+        "联系电话",
+        "院校",
+        "邮箱",
+        "求职意向",
+        "电话"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 110,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页036-简约",
+      "detected_labels": [
+        "专业",
+        "年龄",
+        "邮箱",
+        "求职意向",
+        "地址",
+        "电话"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 60,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页037-极简红",
+      "detected_labels": [
+        "专业",
+        "性别",
+        "邮箱",
+        "求职意向",
+        "地址",
+        "电话"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 34,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页037-极简黑",
+      "detected_labels": [
+        "专业",
+        "性别",
+        "邮箱",
+        "求职意向",
+        "地址",
+        "电话"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 54,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页038-简约",
+      "detected_labels": [
+        "专业",
+        "年龄",
+        "邮箱",
+        "求职意向",
+        "地址",
+        "电话"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 59,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页039-简约",
+      "detected_labels": [
+        "专业",
+        "邮箱",
+        "求职意向",
+        "地址",
+        "电话"
+      ],
+      "label_count": 5,
+      "fields_replaced": 1,
+      "output_size_kb": 41,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页040-极简蓝",
+      "detected_labels": [
+        "院校",
+        "专业"
+      ],
+      "label_count": 2,
+      "fields_replaced": 0,
+      "output_size_kb": 45,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页041-双栏",
+      "detected_labels": [
+        "籍贯",
+        "专业",
+        "学位",
+        "政治面貌",
+        "姓名",
+        "求职意向",
+        "出生日期"
+      ],
+      "label_count": 7,
+      "fields_replaced": 1,
+      "output_size_kb": 217,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页042-双栏",
+      "detected_labels": [
+        "专业",
+        "求职意向"
+      ],
+      "label_count": 2,
+      "fields_replaced": 1,
+      "output_size_kb": 244,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页043-双栏",
+      "detected_labels": [
+        "求职意向"
+      ],
+      "label_count": 1,
+      "fields_replaced": 1,
+      "output_size_kb": 204,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页044-简约",
+      "detected_labels": [
+        "邮箱",
+        "电话",
+        "年龄"
+      ],
+      "label_count": 3,
+      "fields_replaced": 1,
+      "output_size_kb": 87,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页045-双栏",
+      "detected_labels": [
+        "手机",
+        "专业",
+        "学历",
+        "学校",
+        "邮箱",
+        "求职意向"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 248,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页045-双栏——冰美小鲨鲨",
+      "detected_labels": [
+        "手机",
+        "专业",
+        "学历",
+        "学校",
+        "邮箱",
+        "求职意向"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 248,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页046-双栏",
+      "detected_labels": [
+        "手机",
+        "专业",
+        "邮箱",
+        "出生年月",
+        "求职意向",
+        "地址"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 133,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页047-双栏",
+      "detected_labels": [
+        "籍贯",
+        "专业",
+        "学历",
+        "年龄",
+        "姓名",
+        "求职意向"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 103,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页048-双栏",
+      "detected_labels": [
+        "专业",
+        "求职意向",
+        "学校"
+      ],
+      "label_count": 3,
+      "fields_replaced": 1,
+      "output_size_kb": 114,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页049-双栏",
+      "detected_labels": [
+        "籍贯",
+        "专业",
+        "民族",
+        "学历",
+        "年龄",
+        "姓名"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 131,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页050-双栏",
+      "detected_labels": [
+        "专业",
+        "民族",
+        "性别",
+        "学校",
+        "邮箱",
+        "求职意向",
+        "电话"
+      ],
+      "label_count": 7,
+      "fields_replaced": 1,
+      "output_size_kb": 241,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页051-双栏",
+      "detected_labels": [
+        "学位",
+        "专业"
+      ],
+      "label_count": 2,
+      "fields_replaced": 0,
+      "output_size_kb": 125,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页052-双栏",
+      "detected_labels": [
+        "专业"
+      ],
+      "label_count": 1,
+      "fields_replaced": 1,
+      "output_size_kb": 113,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页053-双栏",
+      "detected_labels": [
+        "专业",
+        "求职意向"
+      ],
+      "label_count": 2,
+      "fields_replaced": 0,
+      "output_size_kb": 57,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页054-双栏无照片",
+      "detected_labels": [
+        "手机",
+        "籍贯",
+        "性别",
+        "学历",
+        "年龄",
+        "学校",
+        "邮箱",
+        "求职意向"
+      ],
+      "label_count": 8,
+      "fields_replaced": 1,
+      "output_size_kb": 25,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页055-双栏",
+      "detected_labels": [
+        "专业",
+        "求职意向",
+        "政治面貌"
+      ],
+      "label_count": 3,
+      "fields_replaced": 1,
+      "output_size_kb": 167,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页056-双栏",
+      "detected_labels": [
+        "学位",
+        "学校"
+      ],
+      "label_count": 2,
+      "fields_replaced": 0,
+      "output_size_kb": 157,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页057-双栏",
+      "detected_labels": [],
+      "label_count": 0,
+      "fields_replaced": 1,
+      "output_size_kb": 2134,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页058-双栏",
+      "detected_labels": [
+        "学位"
+      ],
+      "label_count": 1,
+      "fields_replaced": 0,
+      "output_size_kb": 113,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页059-双栏",
+      "detected_labels": [
+        "专业",
+        "求职意向"
+      ],
+      "label_count": 2,
+      "fields_replaced": 1,
+      "output_size_kb": 256,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页060-双栏",
+      "detected_labels": [
+        "专业",
+        "政治面貌",
+        "出生年月",
+        "求职意向",
+        "电话",
+        "姓    名"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 76,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页061-表格",
+      "detected_labels": [
+        "政治面貌",
+        "毕业院校",
+        "院校",
+        "学历",
+        "出生年月",
+        "地址"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 42,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页062-表格",
+      "detected_labels": [
+        "专业",
+        "政治面貌",
+        "毕业院校",
+        "院校",
+        "出生年月",
+        "求职意向"
+      ],
+      "label_count": 6,
+      "fields_replaced": 0,
+      "output_size_kb": 43,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页063-表格",
+      "detected_labels": [
+        "专业",
+        "联系电话",
+        "政治面貌",
+        "院校",
+        "学历",
+        "学校",
+        "出生年月",
+        "求职意向",
+        "电话",
+        "姓    名"
+      ],
+      "label_count": 10,
+      "fields_replaced": 0,
+      "output_size_kb": 52,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页064-表格",
+      "detected_labels": [
+        "性  别",
+        "联系电话",
+        "政治面貌",
+        "毕业院校",
+        "姓  名",
+        "院校",
+        "出生年月",
+        "地址",
+        "电话"
+      ],
+      "label_count": 9,
+      "fields_replaced": 0,
+      "output_size_kb": 56,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页065-表格",
+      "detected_labels": [
+        "专业",
+        "政治面貌",
+        "毕业院校",
+        "院校",
+        "学校",
+        "出生年月",
+        "求职意向"
+      ],
+      "label_count": 7,
+      "fields_replaced": 0,
+      "output_size_kb": 48,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页066-上下",
+      "detected_labels": [
+        "专业",
+        "政治面貌",
+        "毕业院校",
+        "院校",
+        "学历",
+        "邮箱",
+        "姓名",
+        "出生年月",
+        "电话"
+      ],
+      "label_count": 9,
+      "fields_replaced": 1,
+      "output_size_kb": 100,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页067-上下",
+      "detected_labels": [
+        "专业",
+        "学校"
+      ],
+      "label_count": 2,
+      "fields_replaced": 1,
+      "output_size_kb": 138,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页068-上下",
+      "detected_labels": [
+        "专业"
+      ],
+      "label_count": 1,
+      "fields_replaced": 1,
+      "output_size_kb": 92,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页069-上下",
+      "detected_labels": [
+        "手机",
+        "专业",
+        "年龄",
+        "邮箱",
+        "地址"
+      ],
+      "label_count": 5,
+      "fields_replaced": 1,
+      "output_size_kb": 45,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页070-上下",
+      "detected_labels": [
+        "专业",
+        "政治面貌",
+        "学历",
+        "学校",
+        "邮箱",
+        "出生年月",
+        "求职意向",
+        "地址",
+        "电话"
+      ],
+      "label_count": 9,
+      "fields_replaced": 1,
+      "output_size_kb": 89,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页071-上下",
+      "detected_labels": [
+        "专业",
+        "学校"
+      ],
+      "label_count": 2,
+      "fields_replaced": 1,
+      "output_size_kb": 152,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页072-上下",
+      "detected_labels": [
+        "专业",
+        "求职意向"
+      ],
+      "label_count": 2,
+      "fields_replaced": 1,
+      "output_size_kb": 96,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页073-上下",
+      "detected_labels": [
+        "专业"
+      ],
+      "label_count": 1,
+      "fields_replaced": 1,
+      "output_size_kb": 120,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页074-撞色",
+      "detected_labels": [
+        "专业"
+      ],
+      "label_count": 1,
+      "fields_replaced": 1,
+      "output_size_kb": 135,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页075-撞色",
+      "detected_labels": [
+        "手机",
+        "专业",
+        "学校"
+      ],
+      "label_count": 3,
+      "fields_replaced": 1,
+      "output_size_kb": 212,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页076-多彩",
+      "detected_labels": [
+        "年龄",
+        "邮箱",
+        "求职意向",
+        "地址",
+        "电话"
+      ],
+      "label_count": 5,
+      "fields_replaced": 1,
+      "output_size_kb": 127,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页077-双栏",
+      "detected_labels": [
+        "专业",
+        "求职意向"
+      ],
+      "label_count": 2,
+      "fields_replaced": 0,
+      "output_size_kb": 177,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页078-多彩",
+      "detected_labels": [
+        "电子邮箱",
+        "专业",
+        "联系电话",
+        "邮箱",
+        "地址",
+        "电话"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 441,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页079",
+      "detected_labels": [
+        "学位"
+      ],
+      "label_count": 1,
+      "fields_replaced": 1,
+      "output_size_kb": 140,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页080-简约",
+      "detected_labels": [
+        "专业",
+        "政治面貌",
+        "学历",
+        "学校",
+        "邮箱",
+        "姓名",
+        "求职意向",
+        "电话"
+      ],
+      "label_count": 8,
+      "fields_replaced": 1,
+      "output_size_kb": 189,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页081-双栏",
+      "detected_labels": [
+        "专业",
+        "年龄",
+        "学校",
+        "邮箱",
+        "电话"
+      ],
+      "label_count": 5,
+      "fields_replaced": 1,
+      "output_size_kb": 180,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页082-双栏",
+      "detected_labels": [
+        "专业",
+        "求职意向"
+      ],
+      "label_count": 2,
+      "fields_replaced": 0,
+      "output_size_kb": 73,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页083-双栏",
+      "detected_labels": [
+        "学位",
+        "学校"
+      ],
+      "label_count": 2,
+      "fields_replaced": 0,
+      "output_size_kb": 179,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页084-双栏",
+      "detected_labels": [
+        "专业",
+        "出生年月",
+        "求职意向"
+      ],
+      "label_count": 3,
+      "fields_replaced": 1,
+      "output_size_kb": 129,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页085-简约",
+      "detected_labels": [
+        "专业",
+        "邮箱",
+        "求职意向",
+        "地址",
+        "电话"
+      ],
+      "label_count": 5,
+      "fields_replaced": 1,
+      "output_size_kb": 43,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页086-双栏",
+      "detected_labels": [
+        "专业"
+      ],
+      "label_count": 1,
+      "fields_replaced": 1,
+      "output_size_kb": 94,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页087",
+      "detected_labels": [],
+      "label_count": 0,
+      "fields_replaced": 0,
+      "output_size_kb": 122,
+      "error": null,
+      "grade": "F"
+    },
+    {
+      "id": "单页088-双栏",
+      "detected_labels": [
+        "籍贯",
+        "专业",
+        "政治面貌",
+        "邮箱",
+        "求职意向",
+        "电话"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 148,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页089-双栏",
+      "detected_labels": [
+        "学位",
+        "专业",
+        "求职意向"
+      ],
+      "label_count": 3,
+      "fields_replaced": 1,
+      "output_size_kb": 101,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页090-双栏",
+      "detected_labels": [
+        "专业",
+        "求职意向",
+        "政治面貌"
+      ],
+      "label_count": 3,
+      "fields_replaced": 1,
+      "output_size_kb": 167,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页091",
+      "detected_labels": [
+        "专业",
+        "政治面貌",
+        "学校",
+        "求职意向",
+        "姓    名"
+      ],
+      "label_count": 5,
+      "fields_replaced": 1,
+      "output_size_kb": 130,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页092-文艺",
+      "detected_labels": [
+        "地址",
+        "专业",
+        "求职意向",
+        "学校"
+      ],
+      "label_count": 4,
+      "fields_replaced": 1,
+      "output_size_kb": 560,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页093-文艺",
+      "detected_labels": [
+        "手机",
+        "籍贯",
+        "专业",
+        "毕业院校",
+        "民族",
+        "院校",
+        "性别",
+        "学历",
+        "年龄",
+        "求职意向"
+      ],
+      "label_count": 10,
+      "fields_replaced": 1,
+      "output_size_kb": 148,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页094-文艺",
+      "detected_labels": [
+        "专业",
+        "学历",
+        "学校",
+        "邮箱",
+        "电话"
+      ],
+      "label_count": 5,
+      "fields_replaced": 1,
+      "output_size_kb": 246,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页095-文艺",
+      "detected_labels": [
+        "专业",
+        "学历",
+        "学校",
+        "邮箱",
+        "求职意向",
+        "电话"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 190,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页096-带边框",
+      "detected_labels": [
+        "手机",
+        "专业",
+        "政治面貌",
+        "性别",
+        "学历",
+        "邮箱",
+        "出生年月",
+        "地址",
+        "电话"
+      ],
+      "label_count": 9,
+      "fields_replaced": 1,
+      "output_size_kb": 172,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页097-双栏",
+      "detected_labels": [
+        "手机",
+        "专业",
+        "政治面貌",
+        "邮箱",
+        "求职意向",
+        "地址"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 221,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页098-上下",
+      "detected_labels": [
+        "专业"
+      ],
+      "label_count": 1,
+      "fields_replaced": 0,
+      "output_size_kb": 132,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页099-简约",
+      "detected_labels": [
+        "手机",
+        "籍贯",
+        "专业",
+        "政治面貌",
+        "邮箱",
+        "出生年月",
+        "求职意向"
+      ],
+      "label_count": 7,
+      "fields_replaced": 1,
+      "output_size_kb": 55,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页100-红色",
+      "detected_labels": [
+        "手机",
+        "地址",
+        "邮箱",
+        "出生年月"
+      ],
+      "label_count": 4,
+      "fields_replaced": 1,
+      "output_size_kb": 183,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1000",
+      "detected_labels": [
+        "专业",
+        "毕业院校",
+        "政治面貌",
+        "院校",
+        "出生年月",
+        "姓    名"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 99,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1001",
+      "detected_labels": [
+        "专业",
+        "毕业院校",
+        "政治面貌",
+        "院校",
+        "出生年月",
+        "姓    名"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 97,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1002-简约",
+      "detected_labels": [
+        "专业",
+        "毕业院校",
+        "政治面貌",
+        "院校",
+        "出生年月",
+        "姓    名"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 103,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1004",
+      "detected_labels": [
+        "民族",
+        "姓名",
+        "地址",
+        "电话",
+        "出生日期"
+      ],
+      "label_count": 5,
+      "fields_replaced": 1,
+      "output_size_kb": 162,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页101-表格",
+      "detected_labels": [
+        "专业",
+        "政治面貌",
+        "毕业院校",
+        "院校",
+        "出生年月",
+        "求职意向"
+      ],
+      "label_count": 6,
+      "fields_replaced": 0,
+      "output_size_kb": 47,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1010",
+      "detected_labels": [],
+      "label_count": 0,
+      "fields_replaced": 0,
+      "output_size_kb": 0,
+      "error": "模板文件不存在（.doc 格式不支持）",
+      "grade": "F"
+    },
+    {
+      "id": "单页1011-古典精致",
+      "detected_labels": [
+        "院校",
+        "地址",
+        "专业"
+      ],
+      "label_count": 3,
+      "fields_replaced": 0,
+      "output_size_kb": 965,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1012",
+      "detected_labels": [
+        "专业",
+        "学位",
+        "邮箱",
+        "求职意向",
+        "电话",
+        "出生日期"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 81,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1015",
+      "detected_labels": [
+        "手机",
+        "专业",
+        "学历",
+        "学校",
+        "邮箱",
+        "求职意向"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 230,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1017-清新简约",
+      "detected_labels": [
+        "专业",
+        "学校",
+        "邮箱",
+        "求职意向",
+        "地址",
+        "电话"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 203,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1018-灰色简约",
+      "detected_labels": [
+        "专业",
+        "邮箱",
+        "求职意向",
+        "地址",
+        "电话"
+      ],
+      "label_count": 5,
+      "fields_replaced": 1,
+      "output_size_kb": 231,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页102-表格",
+      "detected_labels": [
+        "专业",
+        "政治面貌",
+        "毕业院校",
+        "院校",
+        "学校",
+        "出生年月",
+        "求职意向"
+      ],
+      "label_count": 7,
+      "fields_replaced": 0,
+      "output_size_kb": 49,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1021",
+      "detected_labels": [
+        "专业",
+        "求职意向"
+      ],
+      "label_count": 2,
+      "fields_replaced": 1,
+      "output_size_kb": 251,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页103-表格",
+      "detected_labels": [
+        "专业",
+        "政治面貌",
+        "院校",
+        "姓  名",
+        "出生年月",
+        "求职意向",
+        "电话"
+      ],
+      "label_count": 7,
+      "fields_replaced": 0,
+      "output_size_kb": 48,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1030",
+      "detected_labels": [
+        "地址",
+        "电话",
+        "年龄",
+        "专业"
+      ],
+      "label_count": 4,
+      "fields_replaced": 1,
+      "output_size_kb": 228,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1038",
+      "detected_labels": [
+        "籍贯",
+        "专业",
+        "民族",
+        "学历",
+        "年龄",
+        "姓名"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 188,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页104-表格",
+      "detected_labels": [
+        "电子邮箱",
+        "专业",
+        "联系电话",
+        "性别",
+        "姓名",
+        "邮箱",
+        "求职意向",
+        "电话",
+        "出生日期"
+      ],
+      "label_count": 9,
+      "fields_replaced": 1,
+      "output_size_kb": 56,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1045-文艺简约",
+      "detected_labels": [
+        "专业",
+        "姓    名",
+        "政治面貌"
+      ],
+      "label_count": 3,
+      "fields_replaced": 1,
+      "output_size_kb": 85,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1046-现代简约",
+      "detected_labels": [
+        "性别",
+        "年龄",
+        "邮箱",
+        "地址",
+        "电话"
+      ],
+      "label_count": 5,
+      "fields_replaced": 1,
+      "output_size_kb": 61,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1047-现代简约",
+      "detected_labels": [
+        "专业",
+        "毕业院校",
+        "院校",
+        "年龄",
+        "学校",
+        "姓名",
+        "求职意向",
+        "电话"
+      ],
+      "label_count": 8,
+      "fields_replaced": 1,
+      "output_size_kb": 73,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1048-淡雅",
+      "detected_labels": [
+        "电话",
+        "专业",
+        "求职意向",
+        "学校"
+      ],
+      "label_count": 4,
+      "fields_replaced": 0,
+      "output_size_kb": 0,
+      "error": "Bad CRC-32 for file 'word/media/image2.jpeg'",
+      "grade": "F"
+    },
+    {
+      "id": "单页1049-简约",
+      "detected_labels": [
+        "专业",
+        "姓    名",
+        "政治面貌"
+      ],
+      "label_count": 3,
+      "fields_replaced": 1,
+      "output_size_kb": 95,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页105-表格",
+      "detected_labels": [
+        "性  别",
+        "联系电话",
+        "政治面貌",
+        "毕业院校",
+        "姓  名",
+        "院校",
+        "出生年月",
+        "地址",
+        "电话"
+      ],
+      "label_count": 9,
+      "fields_replaced": 0,
+      "output_size_kb": 50,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1050-现代黑",
+      "detected_labels": [
+        "专业",
+        "毕业院校",
+        "院校",
+        "出生年月",
+        "求职意向"
+      ],
+      "label_count": 5,
+      "fields_replaced": 1,
+      "output_size_kb": 174,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1051-简约",
+      "detected_labels": [
+        "学校",
+        "专业",
+        "姓    名",
+        "政治面貌"
+      ],
+      "label_count": 4,
+      "fields_replaced": 1,
+      "output_size_kb": 94,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1053",
+      "detected_labels": [
+        "求职意向",
+        "地址",
+        "电话",
+        "姓    名",
+        "出生日期"
+      ],
+      "label_count": 5,
+      "fields_replaced": 1,
+      "output_size_kb": 296,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1059",
+      "detected_labels": [
+        "专业",
+        "出生年月",
+        "求职意向",
+        "学校"
+      ],
+      "label_count": 4,
+      "fields_replaced": 1,
+      "output_size_kb": 227,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页106-表格",
+      "detected_labels": [
+        "手机",
+        "籍贯",
+        "电子邮箱",
+        "现居地",
+        "政治面貌",
+        "民族",
+        "院校",
+        "专业",
+        "性别",
+        "学历",
+        "年龄",
+        "手机号码",
+        "姓名",
+        "邮箱",
+        "地址"
+      ],
+      "label_count": 15,
+      "fields_replaced": 1,
+      "output_size_kb": 50,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1060",
+      "detected_labels": [
+        "籍贯",
+        "专业",
+        "政治面貌",
+        "民族",
+        "毕业院校",
+        "院校",
+        "学历",
+        "年龄",
+        "学校",
+        "邮箱",
+        "求职意向",
+        "电话"
+      ],
+      "label_count": 12,
+      "fields_replaced": 1,
+      "output_size_kb": 101,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1061",
+      "detected_labels": [
+        "专业",
+        "姓    名",
+        "政治面貌"
+      ],
+      "label_count": 3,
+      "fields_replaced": 1,
+      "output_size_kb": 155,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1062",
+      "detected_labels": [
+        "专业",
+        "求职意向",
+        "学校"
+      ],
+      "label_count": 3,
+      "fields_replaced": 1,
+      "output_size_kb": 126,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1064",
+      "detected_labels": [
+        "专业",
+        "姓    名",
+        "政治面貌"
+      ],
+      "label_count": 3,
+      "fields_replaced": 1,
+      "output_size_kb": 155,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1065",
+      "detected_labels": [
+        "专业",
+        "学校",
+        "邮箱",
+        "求职意向",
+        "地址",
+        "电话"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 162,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1067",
+      "detected_labels": [
+        "民族",
+        "姓名",
+        "地址",
+        "电话",
+        "出生日期"
+      ],
+      "label_count": 5,
+      "fields_replaced": 1,
+      "output_size_kb": 148,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1069",
+      "detected_labels": [
+        "专业",
+        "求职意向",
+        "民族"
+      ],
+      "label_count": 3,
+      "fields_replaced": 1,
+      "output_size_kb": 119,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页107-上下",
+      "detected_labels": [
+        "求职意向"
+      ],
+      "label_count": 1,
+      "fields_replaced": 1,
+      "output_size_kb": 81,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页1070",
+      "detected_labels": [
+        "电话",
+        "专业",
+        "求职意向",
+        "学校"
+      ],
+      "label_count": 4,
+      "fields_replaced": 1,
+      "output_size_kb": 94,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1076",
+      "detected_labels": [
+        "籍贯",
+        "专业",
+        "学历",
+        "年龄",
+        "学校",
+        "求职意向"
+      ],
+      "label_count": 6,
+      "fields_replaced": 1,
+      "output_size_kb": 79,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1079",
+      "detected_labels": [
+        "学校",
+        "邮箱",
+        "姓名",
+        "地址",
+        "电话"
+      ],
+      "label_count": 5,
+      "fields_replaced": 1,
+      "output_size_kb": 130,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页108-双栏简约",
+      "detected_labels": [
+        "专业",
+        "出生年月",
+        "求职意向"
+      ],
+      "label_count": 3,
+      "fields_replaced": 1,
+      "output_size_kb": 131,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页1084",
+      "detected_labels": [
+        "专业",
+        "求职意向"
+      ],
+      "label_count": 2,
+      "fields_replaced": 1,
+      "output_size_kb": 80,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页1085",
+      "detected_labels": [
+        "籍贯",
+        "专业",
+        "政治面貌",
+        "民族",
+        "性别",
+        "学历",
+        "邮箱",
+        "姓名",
+        "求职意向",
+        "电话",
+        "出生日期"
+      ],
+      "label_count": 11,
+      "fields_replaced": 1,
+      "output_size_kb": 304,
+      "error": null,
+      "grade": "B"
+    },
+    {
+      "id": "单页109",
+      "detected_labels": [
+        "专业",
+        "学校"
+      ],
+      "label_count": 2,
+      "fields_replaced": 1,
+      "output_size_kb": 3052,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页110",
+      "detected_labels": [
+        "专业"
+      ],
+      "label_count": 1,
+      "fields_replaced": 1,
+      "output_size_kb": 267,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "单页111",
+      "detected_labels": [],
+      "label_count": 0,
+      "fields_replaced": 1,
+      "output_size_kb": 83,
+      "error": null,
+      "grade": "C"
+    },
+    {
+      "id": "默认模板",
+      "detected_labels": [
+        "求职意向"
+      ],
+      "label_count": 1,
+      "fields_replaced": 0,
+      "output_size_kb": 0,
+      "error": "No module named 'docx'",
+      "grade": "F"
+    }
+  ]
+}

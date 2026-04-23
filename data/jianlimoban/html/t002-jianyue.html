@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>个人简历 · 深蓝头部简约</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 210mm; min-height: 297mm;
+    font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, sans-serif;
+    color: #2b2b2b;
+    background: #fff;
+    font-size: 10pt;
+    line-height: 1.65;
+  }
+  .header {
+    background: #3a4a5c;
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+  .photo {
+    width: 88px; height: 110px;
+    background: #2a3847;
+    border: 2px solid #5a7a99;
+    border-radius: 4px;
+    flex: none;
+    display: flex; align-items: center; justify-content: center;
+    color: #8aa0b8; font-size: 9pt;
+  }
+  .header-name-block {
+    flex: none;
+    padding-right: 28px;
+    border-right: 1px solid #5a7a99;
+  }
+  .header-name {
+    font-size: 24pt; font-weight: 600;
+    color: #fff;
+    letter-spacing: 4px;
+  }
+  .header-target {
+    font-size: 9.5pt;
+    color: #a0b8d0;
+    margin-top: 4px;
+    letter-spacing: 1px;
+  }
+  .header-info {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 16px;
+    row-gap: 6px;
+    padding-left: 24px;
+  }
+  .header-info-row {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 9.5pt; color: #c8d8e8;
+  }
+  .header-info-row .dot {
+    width: 5px; height: 5px;
+    background: #6ab0d8;
+    border-radius: 50%;
+    flex: none;
+  }
+  .header-info-row .lbl {
+    color: #8aa8c8;
+    min-width: 40px;
+  }
+  .body {
+    padding: 0 28px 24px;
+  }
+  .section {
+    margin-top: 16px;
+  }
+  .section-title {
+    display: flex; align-items: center; gap: 0;
+    background: #eef2f6;
+    border-left: 4px solid #3a6a9c;
+    padding: 5px 14px;
+    font-size: 11pt; font-weight: 600;
+    color: #1a2a3a;
+    margin-bottom: 10px;
+  }
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 32px;
+    row-gap: 5px;
+    padding: 0 6px;
+  }
+  .info-item { font-size: 9.5pt; color: #333; }
+  .info-item .lbl { color: #666; min-width: 52px; display: inline-block; }
+  .info-item .lbl::after { content: '：'; }
+  .item { padding: 0 6px; margin-bottom: 12px; }
+  .item-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 3px;
+  }
+  .item-title { font-weight: 600; font-size: 10pt; color: #1a2a3a; }
+  .item-sub { font-size: 9pt; color: #3a6a9c; margin-bottom: 3px; }
+  .item-date { font-size: 9pt; color: #6a8aaa; }
+  ul { margin-left: 18px; }
+  li { font-size: 9.5pt; color: #333; margin-bottom: 3px; }
+  .desc { font-size: 9.5pt; color: #333; padding: 0 6px; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="photo">照片</div>
+    <div class="header-name-block">
+      <div class="header-name">胡小豆</div>
+      <div class="header-target">求职意向：市场运营专员</div>
+    </div>
+    <div class="header-info">
+      <div class="header-info-row"><span class="dot"></span><span class="lbl">出生年月</span>20xx.05</div>
+      <div class="header-info-row"><span class="dot"></span><span class="lbl">民　族</span>汉</div>
+      <div class="header-info-row"><span class="dot"></span><span class="lbl">电　话</span>138xxxxxxxx</div>
+      <div class="header-info-row"><span class="dot"></span><span class="lbl">邮　箱</span>xxxxx@xx.com</div>
+      <div class="header-info-row"><span class="dot"></span><span class="lbl">毕业院校</span>胡话简历大学</div>
+      <div class="header-info-row"><span class="dot"></span><span class="lbl">学　历</span>本科</div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="section">
+      <div class="section-title">教育背景</div>
+      <div class="item">
+        <div class="item-header">
+          <span class="item-title">胡话简历大学　市场营销（本科）</span>
+          <span class="item-date">20xx.07—20xx.06</span>
+        </div>
+        <div class="item-sub">主修课程</div>
+        <ul>
+          <li>管理学、微观经济学、宏观经济学、管理信息系统、统计学、会计学、财务管理、市场营销、经济法、消费者行为学。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">实习经历</div>
+      <div class="item">
+        <div class="item-header">
+          <span class="item-title">杭州某科技信息技术有限公司</span>
+          <span class="item-date">20xx.04—20xx.06</span>
+        </div>
+        <div class="item-sub">市场营销（兼职）</div>
+        <ul>
+          <li>负责公司重要项目的招投标工作（如开标专项工作），公司重要客户接洽，重要工程、合同、采购、招标等。</li>
+          <li>实施了部分企业事项，根据政府相关文件准备文档，为客户和文档的整理与维护提供了重要支持。</li>
+          <li>配合业务部门完成产品推广方案策划，协助开展线上线下营销活动，覆盖目标用户群体。</li>
+        </ul>
+      </div>
+      <div class="item">
+        <div class="item-header">
+          <span class="item-title">杭州某深圳信息技术有限公司</span>
+          <span class="item-date">20xx.10—20xx.03</span>
+        </div>
+        <div class="item-sub">初级工程师</div>
+        <ul>
+          <li>配合主设计师完成产品原型图与交互稿的输出，参与 APP 端及 WEB 端的界面走查与验收工作。</li>
+          <li>对接业务方梳理需求，输出需求文档及产品说明书，有效缩短各方沟通成本，提升项目交付效率。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">校园经历</div>
+      <div class="item">
+        <div class="item-header">
+          <span class="item-title">胡话简历大学　校园社团负责人</span>
+          <span class="item-date">20xx.09—20xx.06</span>
+        </div>
+        <ul>
+          <li>组织策划活动20余场，覆盖学生用户8000+人次，提升社团品牌影响力，年内获得校级优秀社团奖项。</li>
+          <li>负责招新与社员管理，推动社团从15人发展至80人规模，建立了完整的运营体系与培训机制。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">技能证书</div>
+      <div class="info-grid">
+        <div class="info-item"><span class="lbl">英语水平</span>大学英语六级（CET-6）</div>
+        <div class="info-item"><span class="lbl">办公技能</span>熟练使用 Office 全家桶</div>
+        <div class="info-item"><span class="lbl">专业认证</span>持有相关专业资格证书</div>
+        <div class="info-item"><span class="lbl">其　他</span>具备良好的英语口语表达能力</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">自我评价</div>
+      <p class="desc">深度互联网从业人员，对互联网保持高度的敏感性和关注度；熟悉产品开发流程，有项目交付的经验，能积极参与产品策划、文档输出工作；交流沟通能力强，能配合多端 APP 和 WEB 项目的需求方进行沟通，善于发现问题、解决问题。</p>
+    </div>
+  </div>
+</body>
+</html>

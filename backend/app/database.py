@@ -1,0 +1,30 @@
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from app.config import get_settings
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+engine = create_engine(
+    get_settings().DATABASE_URL,
+    connect_args={"check_same_thread": False},  # SQLite 需要
+)
+
+SessionLocal = sessionmaker(bind=engine)
+
+
+def init_db():
+    """建表，启动时调用一次"""
+    from app.models import models  # noqa: F401 — 确保 model 被注册
+    Base.metadata.create_all(bind=engine)
+
+
+def get_db():
+    """FastAPI 依赖：每个请求一个 session"""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

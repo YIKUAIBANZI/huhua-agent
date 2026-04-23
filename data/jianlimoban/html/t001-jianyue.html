@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>个人简历 · 简约单栏</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 210mm; min-height: 297mm;
+    padding: 18mm 16mm;
+    font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, sans-serif;
+    color: #2b2b2b;
+    background: #fff;
+    font-size: 10.5pt;
+    line-height: 1.7;
+  }
+  .header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 18px;
+  }
+  .title-block .cn-title {
+    font-size: 32pt; font-weight: 300; letter-spacing: 4px; color: #1a1a1a;
+  }
+  .title-block .en-title {
+    font-size: 11pt; color: #888; letter-spacing: 2px; margin-top: -4px;
+  }
+  .photo {
+    width: 95px; height: 120px;
+    background: #e8e8e8;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    color: #aaa; font-size: 9pt;
+  }
+  .section-title {
+    background: #ededed;
+    padding: 6px 14px;
+    font-size: 11.5pt; font-weight: 600;
+    color: #1a1a1a;
+    border-radius: 3px;
+    margin: 18px 0 10px;
+  }
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 32px;
+    row-gap: 6px;
+    padding: 4px 14px;
+  }
+  .info-item { font-size: 10pt; }
+  .info-item .label { color: #555; display: inline-block; min-width: 56px; }
+  .info-item .label::after { content: '：'; }
+
+  .item { padding: 0 14px; margin-bottom: 14px; }
+  .item-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 4px;
+  }
+  .item-title { font-weight: 600; font-size: 10.5pt; color: #1a1a1a; }
+  .item-date { color: #777; font-size: 9.5pt; }
+  .item-sub { color: #555; font-size: 9.5pt; margin-bottom: 4px; }
+  ul { margin-left: 18px; }
+  li { margin-bottom: 3px; font-size: 10pt; color: #333; }
+  .desc { font-size: 10pt; color: #333; padding: 0 14px; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="title-block">
+      <div class="cn-title">个人简历</div>
+      <div class="en-title">— 一个人 一份计划 — Personal resume</div>
+    </div>
+    <div class="photo">照片</div>
+  </div>
+
+  <div class="section-title">基本信息</div>
+  <div class="info-grid">
+    <div class="info-item"><span class="label">姓　名</span>胡小豆</div>
+    <div class="info-item"><span class="label">出生年月</span>20xx.05</div>
+    <div class="info-item"><span class="label">民　族</span>汉</div>
+    <div class="info-item"><span class="label">籍　贯</span>北京</div>
+    <div class="info-item"><span class="label">电　话</span>138xxxxxxxx</div>
+    <div class="info-item"><span class="label">毕业院校</span>胡话简历大学</div>
+    <div class="info-item"><span class="label">邮　箱</span>xxxxx@xx.com</div>
+    <div class="info-item"><span class="label">学　历</span>本科</div>
+  </div>
+
+  <div class="section-title">教育背景</div>
+  <div class="item">
+    <div class="item-header">
+      <span class="item-title">胡话简历大学　本科</span>
+      <span class="item-date">20xx.07—20xx.05</span>
+    </div>
+    <div class="item-sub">主修课程</div>
+    <ul>
+      <li>负责公司重要项目的招投标工作（如开标专项工作），公司重要客户接洽，重要工程、合同、采购、招标等。</li>
+      <li>实施了部分企业事项，根据政府相关文件准备文档，为客户和文档的整理与维护提供了重要支持。</li>
+    </ul>
+  </div>
+
+  <div class="section-title">实习经历</div>
+  <div class="item">
+    <div class="item-header">
+      <span class="item-title">胡话简历大学　实习生（实习）</span>
+      <span class="item-date">20xx.07—20xx.05</span>
+    </div>
+    <ul>
+      <li>负责公司重要项目的招投标工作（如开标专项工作），公司重要客户接洽，重要工程、合同、采购、招标等。</li>
+      <li>实施了部分企业事项，根据政府相关文件准备文档，为客户和文档的整理与维护提供了重要支持。</li>
+    </ul>
+  </div>
+
+  <div class="section-title">校园经历</div>
+  <div class="item">
+    <div class="item-header">
+      <span class="item-title">胡话简历大学　校园社团负责人</span>
+      <span class="item-date">20xx.07—20xx.05</span>
+    </div>
+    <ul>
+      <li>组织策划活动20余场，覆盖学生用户8000+人次，提升社团品牌影响力，年内获得校级优秀社团奖项。</li>
+      <li>负责招新与社员管理，推动社团从15人发展至80人规模，建立了完整的运营体系与培训机制。</li>
+    </ul>
+  </div>
+
+  <div class="section-title">技能证书</div>
+  <div class="info-grid">
+    <div class="info-item"><span class="label">英语水平</span>大学英语六级（CET-6）</div>
+    <div class="info-item"><span class="label">办公技能</span>熟练使用 Office 全家桶</div>
+    <div class="info-item"><span class="label">专业认证</span>持有相关专业资格证书</div>
+    <div class="info-item"><span class="label">其　他</span>具备良好的英语口语表达能力</div>
+  </div>
+
+  <div class="section-title">自我评价</div>
+  <p class="desc">为人乐观开朗、有上进心，对工作认真负责、积极主动、有责任心。具有良好的团队协作精神，善于沟通与表达，能够快速适应新环境与新挑战。在学习与工作中始终保持持续学习的态度，努力提升专业技能与综合素养。</p>
+</body>
+</html>

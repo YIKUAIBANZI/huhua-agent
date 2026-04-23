@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>个人简历 · 淡青色平行四边形</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 210mm; min-height: 297mm;
+    padding: 16mm 16mm;
+    font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, sans-serif;
+    color: #2b2b2b;
+    background: #fff;
+    font-size: 10pt;
+    line-height: 1.7;
+  }
+  .header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 18px;
+  }
+  .title-block { display: flex; align-items: baseline; gap: 12px; }
+  .title-block .cn-wrap {
+    background: #b8d8d8;
+    padding: 4px 28px 4px 18px;
+    border-radius: 4px;
+    transform: skewX(-8deg);
+  }
+  .title-block .cn-wrap span { transform: skewX(8deg); display: inline-block; font-size: 24pt; font-weight: 700; color: #fff; letter-spacing: 4px; }
+  .title-block .en {
+    font-size: 14pt; color: #4a8a8a; font-style: italic; letter-spacing: 1px;
+    border-left: 2px solid #4a8a8a; padding-left: 12px;
+  }
+  .icons { display: flex; gap: 8px; }
+  .icon-circle { width: 24px; height: 24px; border-radius: 50%; background: #b8d8d8; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11pt; }
+  .divider { height: 1px; background: linear-gradient(90deg, #b8d8d8 0%, transparent 100%); margin-bottom: 14px; }
+
+  .section-title {
+    background: #d4e8e8;
+    color: #2d6a6a;
+    padding: 4px 28px 4px 16px;
+    font-size: 11pt; font-weight: 600;
+    margin: 16px 0 10px;
+    clip-path: polygon(0 0, 100% 0, 92% 100%, 0 100%);
+    width: fit-content;
+    min-width: 110px;
+    transform: skewX(-4deg);
+  }
+  .section-title span { display: inline-block; transform: skewX(4deg); }
+
+  .info-row { display: flex; gap: 24px; align-items: flex-start; padding: 4px 8px; }
+  .info-grid {
+    flex: 1;
+    display: grid; grid-template-columns: 1fr 1fr;
+    column-gap: 32px; row-gap: 6px;
+  }
+  .info-item .label { color: #555; display: inline-block; min-width: 56px; }
+  .info-item .label::after { content: '：'; }
+  .photo {
+    width: 95px; height: 120px;
+    background: #d6dbdf;
+    border-radius: 3px;
+    display: flex; align-items: flex-end; justify-content: center;
+    color: #fff; font-size: 8pt;
+    flex: none;
+    position: relative;
+  }
+  .photo::before {
+    content: '照片'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    color: #aaa; font-size: 9pt;
+  }
+  .photo .badge { background: rgba(0,0,0,0.5); padding: 2px 6px; margin-bottom: 4px; border-radius: 2px; }
+
+  .item { padding: 0 8px; margin-bottom: 10px; }
+  .item-text { font-size: 10pt; color: #333; }
+  ul { margin-left: 18px; }
+  li { font-size: 9.5pt; margin-bottom: 3px; color: #333; }
+  .desc { font-size: 9.5pt; color: #333; padding: 0 8px; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="title-block">
+      <div class="cn-wrap"><span>个人简历</span></div>
+      <div class="en">Personal resume</div>
+    </div>
+    <div class="icons">
+      <span class="icon-circle">✉</span>
+      <span class="icon-circle">☎</span>
+      <span class="icon-circle">i</span>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <div class="section-title"><span>基本信息</span></div>
+  <div class="info-row">
+    <div class="info-grid">
+      <div class="info-item"><span class="label">姓　名</span>胡小豆</div>
+      <div class="info-item"><span class="label">出生年月</span>20xx.05</div>
+      <div class="info-item"><span class="label">民　族</span>汉</div>
+      <div class="info-item"><span class="label">身　高</span>167cm</div>
+      <div class="info-item"><span class="label">电　话</span>138xxxxxxxx</div>
+      <div class="info-item"><span class="label">政治面貌</span>中共党员</div>
+      <div class="info-item"><span class="label">邮　箱</span>xxxxx@xx.com</div>
+      <div class="info-item"><span class="label">毕业院校</span>胡话简历大学</div>
+      <div class="info-item"><span class="label">住　址</span>北京市朝阳区</div>
+      <div class="info-item"><span class="label">学　历</span>本科</div>
+    </div>
+    <div class="photo"><div class="badge">点击更改/替换</div></div>
+  </div>
+
+  <div class="section-title"><span>教育背景</span></div>
+  <div class="item">
+    <p class="item-text">20xx 年 9 月至 20xx 年 6 月　就读于胡话简历大学附属中学。</p>
+    <p class="item-text">20xx 年 9 月至 20xx 年 6 月　就读于胡话简历大学市场营销专业。</p>
+  </div>
+
+  <div class="section-title"><span>实习经历</span></div>
+  <div class="item">
+    <ul>
+      <li>实习时间：20xx 年 4 月 - 20xx 年 6 月。</li>
+      <li>地点：北京市第一名医院。</li>
+      <li>职务：病房护理科护士。</li>
+      <li>工作内容：负责药品检查、打针、配药、病人护理、病人看护、急重病人看护、心里咨询、配合护士长完成日常工作等。</li>
+    </ul>
+  </div>
+
+  <div class="section-title"><span>校园经历</span></div>
+  <div class="item">
+    <p class="item-text">胡话简历大学校园社团负责人，20xx.09—20xx.06，组织策划 AAA 社团各项活动 20 余场，辅助主席日常工作并执行各项决议。</p>
+  </div>
+
+  <div class="section-title"><span>技能证书</span></div>
+  <div class="item">
+    <ul>
+      <li>大学英语六级（CET-6）：良好的听说读写能力、快速阅读英语专业文献及书籍。</li>
+      <li>通过全国计算机二级考试，熟练运用 Office 全家桶。</li>
+    </ul>
+  </div>
+
+  <div class="section-title"><span>自我评价</span></div>
+  <p class="desc">深度互联网从业人员，对互联网保持高度的敏感性和关注度；熟悉产品开发流程，有项目交付的经验，能积极参与产品策划、文档输出工作。</p>
+</body>
+</html>

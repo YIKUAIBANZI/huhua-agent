@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>个人简历 · 姓名抬头型</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 210mm; min-height: 297mm;
+    padding: 16mm 16mm;
+    font-family: 'PingFang SC', 'Noto Sans SC', -apple-system, sans-serif;
+    color: #2b2b2b;
+    background: #fff;
+    font-size: 10pt;
+    line-height: 1.7;
+  }
+  .header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    border-bottom: 2px solid #7fb1c4;
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+  }
+  .name-block .name {
+    font-size: 30pt; font-weight: 700; color: #1a1a1a; letter-spacing: 4px;
+    margin-bottom: 4px;
+  }
+  .name-block .meta {
+    font-size: 9.5pt; color: #555; line-height: 1.8;
+  }
+  .name-block .meta span { margin-right: 14px; }
+  .photo {
+    width: 90px; height: 115px;
+    background: #e8e8e8;
+    border-radius: 3px;
+    display: flex; align-items: flex-end; justify-content: center;
+    color: #fff; font-size: 8pt;
+    flex: none;
+    position: relative;
+  }
+  .photo::before {
+    content: '照片'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    color: #aaa; font-size: 9pt;
+  }
+  .photo .badge { background: rgba(0,0,0,0.5); padding: 2px 6px; margin-bottom: 4px; border-radius: 2px; }
+
+  .section-title {
+    background: linear-gradient(90deg, #b8d8d8 0%, #d8e8e8 100%);
+    color: #2d5d6d;
+    padding: 5px 22px 5px 14px;
+    font-size: 11pt; font-weight: 600;
+    margin: 14px 0 10px;
+    clip-path: polygon(0 0, 100% 0, 92% 100%, 0 100%);
+    width: fit-content;
+    min-width: 130px;
+  }
+
+  .item { padding: 0 8px; margin-bottom: 10px; }
+  .item-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .item-title { font-weight: 600; color: #1a1a1a; }
+  .item-date { color: #5b8fb0; font-size: 9.5pt; }
+  .item-sub { color: #555; font-size: 9.5pt; }
+  ul { margin-left: 18px; }
+  li { font-size: 9.5pt; margin-bottom: 3px; color: #333; }
+  .desc { font-size: 9.5pt; color: #333; padding: 0 8px; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="name-block">
+      <div class="name">胡小豆</div>
+      <div class="meta">
+        <span>求职意向：市场运营专员</span>
+        <span>电话：138xxxxxxxx</span>
+        <span>邮箱：xxxxx@xx.com</span><br>
+        <span>所在地：北京</span>
+        <span>政治面貌：中共党员</span>
+        <span>身　高：167cm</span>
+      </div>
+    </div>
+    <div class="photo"><div class="badge">点击更改/替换</div></div>
+  </div>
+
+  <div class="section-title">教育背景</div>
+  <div class="item">
+    <div class="item-header">
+      <span class="item-title">胡话简历大学　工商管理专业（本科）</span>
+      <span class="item-date">20xx.07—20xx.05</span>
+    </div>
+    <ul>
+      <li>主修课程：管理学、微观经济学、宏观经济学、统计学、会计学、市场营销学、消费者行为学、国际市场营销。</li>
+      <li>在校期间多次获得校级一等奖学金，担任学生会干部。</li>
+    </ul>
+  </div>
+
+  <div class="section-title">工作经历</div>
+  <div class="item">
+    <div class="item-header">
+      <span class="item-title">胡话简历大学　校园品牌实习生</span>
+      <span class="item-date">20xx.03—20xx.06</span>
+    </div>
+    <ul>
+      <li>负责公司重要项目的招投标工作（如开标专项工作），公司重要客户接洽，重要工程、合同、采购、招标等。</li>
+      <li>实施了部分企业事项，根据政府相关文件准备文档，为客户和文档的整理与维护提供了重要支持。</li>
+    </ul>
+  </div>
+
+  <div class="section-title">校园实践</div>
+  <div class="item">
+    <div class="item-header">
+      <span class="item-title">胡话简历大学　校园社团负责人</span>
+      <span class="item-date">20xx.12—20xx.06</span>
+    </div>
+    <ul>
+      <li>组织策划AAA社团各项活动20余场，辅助主席日常工作并执行各项决议。</li>
+      <li>带领班级在学校组织的各项比赛中获得优秀奖项，组织策划比赛活动6场。</li>
+    </ul>
+  </div>
+
+  <div class="section-title">技能证书</div>
+  <div class="item">
+    <ul>
+      <li>大学英语六级（CET-6 580分）：良好的听说读写能力、快速阅读英语专业文献及书籍。</li>
+      <li>通过全国计算机二级考试，熟练运用 Office 全家桶。</li>
+    </ul>
+  </div>
+
+  <div class="section-title">自我评价</div>
+  <p class="desc">为人乐观开朗、有上进心，对工作认真负责、积极主动、有责任心。具有良好的团队协作精神，善于沟通与表达，能够快速适应新环境与新挑战。</p>
+</body>
+</html>

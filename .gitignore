@@ -1,0 +1,45 @@
+# Secrets
+.env
+.env.*
+!.env.example
+*.env.bak
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+venv/
+.venv/
+
+# Node
+node_modules/
+
+# Data runtime (don't ship vector DB / backups / personal resumes)
+data/chroma_db/
+data/_backup_*/
+data/notes/
+data/output/
+data/scan_output/
+data/template_previews/
+data/banz_resume.json
+
+# Tooling
+.playwright-cli/
+.DS_Store
+*.log
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Claude Code 本地会话数据
+.claude/
+
+# Build
+build/
+dist/
