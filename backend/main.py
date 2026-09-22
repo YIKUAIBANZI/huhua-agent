@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import time
 from collections import defaultdict, deque
@@ -15,7 +16,12 @@ from app.api import chat, resume
 from app.database import init_db
 from app.config import get_settings
 from app.agents.resume_graph import configure_checkpointer
-from app.services.session_store import delete_expired_resume_sessions
+from app.services.session_store import (
+    list_sessions_needing_checkpoint_cleanup,
+    purge_expired_resume_session,
+    session_lock,
+    session_needs_checkpoint_cleanup,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -40,12 +46,48 @@ _preload_chromadb()
 
 
 async def _cleanup_expired_sessions(checkpointer) -> None:
-    session_ids = delete_expired_resume_sessions(get_settings().SESSION_RETENTION_DAYS)
+    retention_days = get_settings().SESSION_RETENTION_DAYS
+    session_ids = list_sessions_needing_checkpoint_cleanup(retention_days)
     for session_id in session_ids:
+        async with session_lock(session_id):
+            if not session_needs_checkpoint_cleanup(session_id, retention_days):
+                continue
+            try:
+                await checkpointer.adelete_thread(session_id)
+                purge_expired_resume_session(session_id, retention_days)
+            except Exception:
+                # Keep the row so the next pass can retry the checkpoint.
+                logger.warning("session checkpoint deletion failed", exc_info=True)
+
+
+async def _periodic_cleanup(checkpointer, stop: asyncio.Event) -> None:
+    while not stop.is_set():
         try:
-            await checkpointer.adelete_thread(session_id)
-        except Exception:
-            logger.warning("expired checkpoint deletion failed", exc_info=True)
+            await asyncio.wait_for(stop.wait(), timeout=900)
+        except TimeoutError:
+            try:
+                await _cleanup_expired_sessions(checkpointer)
+            except Exception:
+                logger.warning("periodic session cleanup failed", exc_info=True)
+
+
+@asynccontextmanager
+async def _checkpoint_lifespan(checkpointer):
+    configure_checkpointer(checkpointer)
+    app.state.checkpointer = checkpointer
+    try:
+        await _cleanup_expired_sessions(checkpointer)
+    except Exception:
+        logger.warning("initial session cleanup failed", exc_info=True)
+    stop = asyncio.Event()
+    cleanup_task = asyncio.create_task(_periodic_cleanup(checkpointer, stop))
+    try:
+        yield
+    finally:
+        stop.set()
+        await cleanup_task
+        app.state.checkpointer = None
+        configure_checkpointer(None)
 
 
 @asynccontextmanager
@@ -57,48 +99,69 @@ async def lifespan(app: FastAPI):
 
         async with AsyncPostgresSaver.from_conn_string(database_url) as saver:
             await saver.setup()
-            configure_checkpointer(saver)
-            await _cleanup_expired_sessions(saver)
-            try:
+            async with _checkpoint_lifespan(saver):
                 yield
-            finally:
-                configure_checkpointer(None)
     else:
         checkpoint_path = Path(get_settings().CHECKPOINT_DB_PATH)
         checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
         async with AsyncSqliteSaver.from_conn_string(str(checkpoint_path)) as saver:
-            configure_checkpointer(saver)
-            await _cleanup_expired_sessions(saver)
-            try:
+            await saver.setup()
+            async with _checkpoint_lifespan(saver):
                 yield
-            finally:
-                configure_checkpointer(None)
 
 
 app = FastAPI(title="胡话简历 Agent", version="1.0.0", lifespan=lifespan)
 
-_chat_requests: dict[str, deque[float]] = defaultdict(deque)
+_chat_requests: dict[tuple[str, str], deque[float]] = defaultdict(deque)
+_all_paid_requests: deque[float] = deque()
 CHAT_WINDOW_SECONDS = 600
-CHAT_REQUEST_LIMIT = 15
+CHAT_REQUEST_LIMIT = 80
+MATCH_REQUEST_LIMIT = 30
+GLOBAL_REQUEST_LIMIT = 120
+
 
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
-    if request.url.path == "/api/chat/stream" and request.method == "POST":
-        forwarded = request.headers.get("x-forwarded-for", "").split(",", 1)[0].strip()
-        client_ip = forwarded or (request.client.host if request.client else "unknown")
-        now = time.monotonic()
-        timestamps = _chat_requests[client_ip]
-        while timestamps and now - timestamps[0] > CHAT_WINDOW_SECONDS:
-            timestamps.popleft()
-        if len(timestamps) >= CHAT_REQUEST_LIMIT:
+    if request.url.path == "/api/chat/upload" and request.method == "POST":
+        # Reject ordinary oversized multipart bodies before Starlette spools
+        # them. Chunked transfer still needs an ingress body-size limit.
+        length = request.headers.get("content-length", "")
+        if length.isdigit() and int(length) > 11 * 1024 * 1024:
             from fastapi.responses import JSONResponse
 
+            return JSONResponse(status_code=413, content={"detail": "文件超过 10MB 上限"})
+    if (
+        request.url.path in {"/api/chat/stream", "/api/resume/match"}
+        and request.method == "POST"
+    ):
+        # Uvicorn may rewrite request.client only for proxies it explicitly
+        # trusts. Never use an arbitrary X-Forwarded-For header here.
+        client_ip = request.client.host if request.client else "unknown"
+        now = time.monotonic()
+        key = (request.url.path, client_ip)
+        timestamps = _chat_requests[key]
+        while timestamps and now - timestamps[0] > CHAT_WINDOW_SECONDS:
+            timestamps.popleft()
+        while _all_paid_requests and now - _all_paid_requests[0] > CHAT_WINDOW_SECONDS:
+            _all_paid_requests.popleft()
+        limit = (
+            CHAT_REQUEST_LIMIT
+            if request.url.path == "/api/chat/stream"
+            else MATCH_REQUEST_LIMIT
+        )
+        if len(timestamps) >= limit or len(_all_paid_requests) >= GLOBAL_REQUEST_LIMIT:
+            from fastapi.responses import JSONResponse
+
+            oldest = timestamps[0] if len(timestamps) >= limit else _all_paid_requests[0]
             return JSONResponse(
                 status_code=429,
                 content={"detail": "请求有点频繁，请稍后再试"},
-                headers={"Retry-After": "60"},
+                headers={
+                    "Retry-After": str(max(1, int(CHAT_WINDOW_SECONDS - (now - oldest))))
+                },
             )
         timestamps.append(now)
+        _all_paid_requests.append(now)
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Referrer-Policy"] = "same-origin"

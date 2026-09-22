@@ -1,5 +1,6 @@
 """HTML 简历渲染服务：Jinja2 模板 + ResumeData → HTML 字符串。"""
 
+import re
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +24,9 @@ _env = Environment(
     autoescape=select_autoescape(["html", "htm", "j2"]),
 )
 
+_PHOTO_DATA_URL = re.compile(r"\Adata:image/(?:jpeg|png);base64,[A-Za-z0-9+/]+={0,2}\Z")
+_MAX_PHOTO_URL_LENGTH = 7 * 1024 * 1024
+
 
 def list_templates() -> list[dict[str, str]]:
     return TEMPLATES
@@ -34,4 +38,9 @@ def render_resume(template_id: str, data: dict[str, Any]) -> str:
         template = _env.get_template(filename)
     except TemplateNotFound:
         raise ValueError(f"模板不存在: {template_id}")
-    return template.render(**data)
+    # 预览只允许本机上传的 JPEG/PNG data URL，避免外部图片追踪和属性注入。
+    basic = dict(data.get("basic_info") or {})
+    photo = basic.get("photo")
+    if not isinstance(photo, str) or len(photo) > _MAX_PHOTO_URL_LENGTH or not _PHOTO_DATA_URL.fullmatch(photo):
+        basic["photo"] = ""
+    return template.render(**{**data, "basic_info": basic})

@@ -88,7 +88,7 @@
     <div class="absolute bottom-1/4 -left-20 w-80 h-80 bg-tertiary-fixed/30 rounded-full blur-[100px] pointer-events-none"></div>
 
     <!-- 空状态（欢迎页） -->
-    <div id="empty-state" class="w-full max-w-4xl flex flex-col items-center z-10 pt-4 px-8">
+    <div id="empty-state" class="w-full max-w-4xl flex-1 min-h-0 overflow-y-auto flex flex-col items-center z-10 pt-4 px-4 md:px-8">
       <div class="text-center mb-5 space-y-2">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-tertiary-fixed/20 text-on-tertiary-fixed-variant text-[10px] font-bold uppercase tracking-[0.1em] border border-tertiary-fixed/30">
           <span class="w-1 h-1 rounded-full bg-tertiary-fixed"></span> AI 简历助手
@@ -100,11 +100,11 @@
           对话收集经历，右侧 A4 实时长出来。有 JD 做岗位匹配，没 JD 做能力展示。
         </p>
         <p class="text-xs text-on-surface-variant/70 max-w-xl mx-auto">
-          简历与岗位信息会用于生成并暂存 7 天。请勿上传身份证、银行卡等无关敏感信息；点击“新对话”会立即删除当前会话数据。
+          输入内容会发送给第三方生成模型；服务器暂存约 7 天，本机记录超过 7 天会在下次打开时清理。请勿上传身份证、银行卡等无关敏感信息；点击“新对话”会删除当前会话数据。
         </p>
       </div>
-      <div class="grid grid-cols-3 gap-4 w-full mb-5">
-        <div class="col-span-2 bg-surface-container-lowest p-5 rounded-[2rem] border border-outline-variant/10 shadow-xl shadow-on-surface/5 flex flex-col justify-between">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full mb-5">
+        <div class="sm:col-span-2 bg-surface-container-lowest p-5 rounded-[2rem] border border-outline-variant/10 shadow-xl shadow-on-surface/5 flex flex-col justify-between">
           <div class="space-y-4">
             <div class="flex items-start gap-4">
               <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
@@ -144,10 +144,19 @@
     </div>
 
     <!-- 对话消息列表 -->
-    <div id="messages" class="hidden w-full max-w-3xl flex-1 overflow-y-auto z-10 px-8 py-8 space-y-6"></div>
+    <div id="messages" class="hidden w-full max-w-3xl flex-1 min-h-0 overflow-y-auto z-10 px-4 md:px-8 py-8 space-y-6"></div>
+
+    <div id="match-panel" class="hidden w-full max-w-3xl z-10 px-4 md:px-8 pb-2">
+      <div class="rounded-2xl border border-outline-variant/30 bg-surface-container-lowest p-4 text-sm">
+        <div class="font-semibold text-on-surface">岗位匹配参考 · 实验功能</div>
+        <p class="mt-1 text-on-surface-variant">点击后会将岗位要求和简历能力标签发送给 TypeSafe Jev。分数只反映当前简历对这份 JD 的证据覆盖，不代表 ATS 结果或面试概率。</p>
+        <button id="btn-match" class="mt-3 rounded-full bg-primary px-4 py-2 text-on-primary font-semibold disabled:opacity-50">同意并查看匹配</button>
+        <div id="match-result" class="mt-3 hidden max-h-48 overflow-y-auto space-y-2" aria-live="polite"></div>
+      </div>
+    </div>
 
     <!-- 底部 Command Bar -->
-    <div class="w-full max-w-4xl px-8 pb-4 z-10">
+    <div class="w-full max-w-4xl px-4 md:px-8 pb-4 z-10 shrink-0">
       <div id="command-bar" class="relative group">
         <div class="absolute -inset-1 bg-gradient-to-r from-primary/10 to-tertiary-fixed/10 rounded-[2rem] blur-xl opacity-50 group-focus-within:opacity-100 transition-opacity"></div>
         <div id="command-surface" class="relative bg-surface-container-lowest/80 backdrop-blur-2xl rounded-[2rem] p-3 shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-white/40 transition-all">
@@ -205,7 +214,7 @@
     </div>
     <div class="flex items-center gap-2">
       <a id="btn-open-full" class="text-xs text-primary font-semibold hover:underline" href="/resume">全屏模板</a>
-      <button id="btn-export-docx" class="text-xs px-3 py-1.5 rounded-full bg-primary text-on-primary font-semibold disabled:opacity-40" disabled>导出 Word</button>
+      <button id="btn-export-docx" class="text-xs px-3 py-1.5 rounded-full bg-primary text-on-primary font-semibold disabled:opacity-40" title="下载通用排版的 Word，所选模板样式适用于 PDF" disabled>通用 Word</button>
     </div>
   </div>
   <div id="stage-rail" class="px-5 pb-3"></div>
@@ -217,7 +226,7 @@
       <p class="text-on-surface-variant text-sm mt-2 leading-relaxed">贴 JD 或聊项目，经历确认后这里会铺开 A4。</p>
     </div>
     <div id="canvas-sheet-wrap" class="hidden h-full overflow-auto rounded-2xl bg-[#d8d2e4] p-4">
-      <iframe id="live-sheet" class="block mx-auto bg-white"></iframe>
+      <iframe id="live-sheet" class="block mx-auto bg-white" sandbox=""></iframe>
     </div>
   </div>
 </aside>
@@ -228,22 +237,43 @@
 const API = '/api/chat/stream';
 const SESSION_KEY = 'huhua_session_id';
 const MSG_KEY = 'huhua_messages';
+const SAVED_AT_KEY = 'huhua_saved_at';
+const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const savedAt = Number(localStorage.getItem(SAVED_AT_KEY) || 0);
+if (!savedAt || Date.now() - savedAt >= SESSION_TTL_MS) {
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem(MSG_KEY);
+  localStorage.removeItem(SAVED_AT_KEY);
+}
 // 跳页回来时优先恢复旧 session；第一次打开才生成新的
 let SESSION_ID = localStorage.getItem(SESSION_KEY) || crypto.randomUUID();
 localStorage.setItem(SESSION_KEY, SESSION_ID);
+if (!localStorage.getItem(SAVED_AT_KEY)) {
+  localStorage.setItem(SAVED_AT_KEY, String(Date.now()));
+}
 // 恢复消息历史（每次 send 完会写入）
 let _saved = [];
 try { _saved = JSON.parse(localStorage.getItem(MSG_KEY) || '[]'); } catch { _saved = []; }
 const messages = Array.isArray(_saved) ? _saved : [];
 
 function saveMessages() {
-  try { localStorage.setItem(MSG_KEY, JSON.stringify(messages)); }
+  try {
+    localStorage.setItem(MSG_KEY, JSON.stringify(messages));
+    localStorage.setItem(SAVED_AT_KEY, String(Date.now()));
+  }
   catch (e) { /* localStorage 满了也不阻塞 */ }
 }
 
 const emptyStateEl = document.getElementById('empty-state');
 const messagesEl = document.getElementById('messages');
 const inputEl = document.getElementById('input');
+function updateInputPlaceholder() {
+  inputEl.placeholder = window.matchMedia('(max-width: 640px)').matches
+    ? '贴 JD，或说说你的经历'
+    : '输入消息，Enter 发送 · 可粘贴或拖入 PDF/DOCX/TXT/MD';
+}
+updateInputPlaceholder();
+window.addEventListener('resize', updateInputPlaceholder);
 const sendBtn = document.getElementById('btn-send');
 
 function appendBubble(role, content) {
@@ -290,6 +320,10 @@ function setSendButtonMode(mode) {
 async function send(text) {
   // 流式中忽略新发送，避免孤儿 fetch（旧 controller 被覆盖就再也 abort 不了）
   if (currentController) return;
+  if (pendingUploads > 0) {
+    alert('附件还在上传，请等上传完成后再发送。');
+    return;
+  }
   text = (text ?? inputEl.value).trim();
   // 允许"只有附件没有文字"也能发
   if (!text && attachments.length === 0) return;
@@ -302,6 +336,8 @@ async function send(text) {
     ? (text ? `${attachmentPrefix}\n\n---\n\n${text}` : attachmentPrefix)
     : text;
   const displayText = text || `（已上传 ${attachments.length} 个文件）`;
+
+  clearMatchResult();
 
   inputEl.value = '';
   autoResize();
@@ -401,6 +437,68 @@ const canvasState = {
   templateId: 't001-jianyue',
 };
 
+const matchPanel = document.getElementById('match-panel');
+const matchResult = document.getElementById('match-result');
+const matchButton = document.getElementById('btn-match');
+
+function clearMatchResult() {
+  matchResult.replaceChildren();
+  matchResult.classList.add('hidden');
+}
+
+function setMatchAvailable(available) {
+  matchPanel.classList.toggle('hidden', !available);
+  if (!available) clearMatchResult();
+}
+
+function addMatchLine(text, className = 'text-on-surface-variant') {
+  const line = document.createElement('p');
+  line.className = className;
+  line.textContent = text;
+  matchResult.appendChild(line);
+}
+
+matchButton.addEventListener('click', async () => {
+  if (currentController) return;
+  clearMatchResult();
+  matchResult.classList.remove('hidden');
+  addMatchLine('正在核对这份 JD 与简历…');
+  matchButton.disabled = true;
+  try {
+    const response = await fetch('/api/resume/match', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: SESSION_ID }),
+    });
+    if (!response.ok) throw new Error(`请求失败 (${response.status})`);
+    const result = await response.json();
+    matchResult.replaceChildren();
+    if (result.status === 'ready' && typeof result.score === 'number') {
+      addMatchLine(`参考覆盖分 ${Math.round(result.score)}/100`, 'font-bold text-primary');
+    }
+    if (result.message) addMatchLine(result.message);
+    const levels = {
+      missing: '暂无证据',
+      weak: '有相关线索，建议补充具体经历',
+      supported: '有直接经历支撑',
+      unscored: '暂未评估',
+    };
+    for (const item of result.requirements || []) {
+      const level = levels[item.level] || '暂未评估';
+      addMatchLine(`${item.text}：${level}${item.evidence_text ? ` · ${item.evidence_text}` : ''}`);
+    }
+    if (result.status !== 'ready' && !result.message) {
+      addMatchLine('目前无法生成参考分，请先查看投递前核对。');
+    }
+    for (const check of (result.checks || []).slice(0, 3)) addMatchLine(`核对：${check}`);
+  } catch (error) {
+    matchResult.replaceChildren();
+    addMatchLine(`匹配暂不可用：${error.message}`);
+  } finally {
+    matchButton.disabled = false;
+  }
+});
+
 function applyMeta(meta) {
   if (meta.stage) canvasState.stage = meta.stage;
   if (typeof meta.has_data === 'boolean') canvasState.hasData = meta.has_data;
@@ -479,6 +577,7 @@ async function refreshCanvas() {
     const r = await fetch(`/api/resume/current?session_id=${encodeURIComponent(SESSION_ID)}`);
     if (!r.ok) return;
     const body = await r.json();
+    setMatchAvailable(Boolean(body.has_data && body.has_jd && body.match_enabled));
     if (body.stage) canvasState.stage = body.stage;
     renderStageRail();
     if (body.has_data && body.data) {
@@ -496,6 +595,7 @@ async function maybeShowGenerateLink() {
     const r = await fetch(`/api/resume/current?session_id=${encodeURIComponent(SESSION_ID)}`);
     if (!r.ok) return;
     const body = await r.json();
+    setMatchAvailable(Boolean(body.has_data && body.has_jd && body.match_enabled));
     if (body.stage) {
       canvasState.stage = body.stage;
       renderStageRail();
@@ -582,6 +682,10 @@ setChipActive(null);
 
 // 新对话按钮（可选存在）：清空本地记录 + 换 SESSION_ID
 document.getElementById('btn-new-chat')?.addEventListener('click', async () => {
+  if (currentController) {
+    alert('请先结束当前生成，再开始新对话。');
+    return;
+  }
   if (messages.length && !confirm('清空当前对话，开始新对话？')) return;
   const oldSessionId = SESSION_ID;
   try {
@@ -599,6 +703,8 @@ document.getElementById('btn-new-chat')?.addEventListener('click', async () => {
   clearAttachments();
   SESSION_ID = crypto.randomUUID();
   localStorage.setItem(SESSION_KEY, SESSION_ID);
+  localStorage.setItem(SAVED_AT_KEY, String(Date.now()));
+  setMatchAvailable(false);
   resetGenerateLink();
   canvasState.hasData = false;
   canvasState.data = null;
@@ -613,6 +719,7 @@ document.getElementById('btn-new-chat')?.addEventListener('click', async () => {
 
 // ── 文件附件：上传 / 粘贴 / 拖拽 ────────────────────────────────
 const attachments = [];
+let pendingUploads = 0;
 const attachmentsEl = document.getElementById('attachments');
 const fileInputEl = document.getElementById('file-input');
 const dropOverlay = document.getElementById('drop-overlay');
@@ -634,12 +741,22 @@ function renderAttachments() {
   attachments.forEach((a, i) => {
     const chip = document.createElement('div');
     chip.className = 'inline-flex items-center gap-2 bg-surface-container-high px-3 py-1.5 rounded-full text-xs text-on-surface max-w-[240px]';
-    chip.innerHTML = `
-      <span class="material-symbols-outlined text-sm text-primary">description</span>
-      <span class="truncate font-medium" title="${a.filename}">${a.filename}</span>
-      <span class="text-outline">${a.text_length}字</span>
-      <button class="chip-remove material-symbols-outlined text-sm text-outline hover:text-error" data-idx="${i}" style="font-size:16px;">close</button>
-    `;
+    const icon = document.createElement('span');
+    icon.className = 'material-symbols-outlined text-sm text-primary';
+    icon.textContent = 'description';
+    const name = document.createElement('span');
+    name.className = 'truncate font-medium';
+    name.title = a.filename;
+    name.textContent = a.filename;
+    const length = document.createElement('span');
+    length.className = 'text-outline';
+    length.textContent = `${a.text_length}字`;
+    const remove = document.createElement('button');
+    remove.className = 'chip-remove material-symbols-outlined text-sm text-outline hover:text-error';
+    remove.dataset.idx = i;
+    remove.style.fontSize = '16px';
+    remove.textContent = 'close';
+    chip.append(icon, name, length, remove);
     attachmentsEl.appendChild(chip);
   });
   attachmentsEl.querySelectorAll('.chip-remove').forEach(btn => {
@@ -667,6 +784,7 @@ async function uploadOne(file) {
   // 占位 chip（上传中）
   const placeholder = { filename: file.name, text: '', text_length: 0, uploading: true };
   attachments.push(placeholder);
+  pendingUploads++;
   renderAttachments();
 
   try {
@@ -686,6 +804,8 @@ async function uploadOne(file) {
     if (idx !== -1) attachments.splice(idx, 1);
     renderAttachments();
     alert(`上传失败：${e.message}`);
+  } finally {
+    pendingUploads--;
   }
 }
 

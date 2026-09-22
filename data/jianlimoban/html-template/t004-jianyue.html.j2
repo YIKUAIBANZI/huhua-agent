@@ -117,7 +117,7 @@
           {% if education and education[0].degree %}<div class="h-info-row"><span class="lbl">学　历</span>{{ education[0].degree }}</div>{% endif %}
         </div>
       </div>
-      {% if basic_info.photo %}<div class="photo"><img src="{{ basic_info.photo|safe }}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;"></div>{% else %}<div class="photo">照片</div>{% endif %}
+      {% if basic_info.photo %}<div class="photo"><img src="{{ basic_info.photo }}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;"></div>{% else %}<div class="photo">照片</div>{% endif %}
     </div>
 
     {% if education %}

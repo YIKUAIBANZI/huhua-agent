@@ -10,6 +10,7 @@ Agent 用 interrupt() 暂停等待用户输入，用户回复后继续推进。
 
 import json
 import logging
+import re as _re
 from typing import Annotated, Any
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
@@ -89,8 +90,6 @@ def _init_state() -> ResumeState:
 # 把对话收集到的 state → ResumeData dict，供 /resume 渲染。
 # 硬性约束：身高/性别/年龄/籍贯/政治面貌/民族 默认空串，只有用户在对话里
 # 主动陈述才填（例如 "我 167cm"、"身高 170"、"我 22 岁"）。不推测、不预填。
-
-import re as _re
 
 
 def _extract_opt_basic_info(messages: list) -> dict:
@@ -228,20 +227,6 @@ def _guess_project_name(text: str) -> str:
     return m.group(1) if m else ""
 
 
-def _extract_wrapped_bullet(content: str) -> str:
-    """从 COLLECTING_WRAP 回复里提取可进入 ResumeData 的第一条 bullet。"""
-    if not content:
-        return ""
-    match = _re.search(r"🧷[^\n:：]*[:：]\s*(.+)", content)
-    if match:
-        return match.group(1).strip(" *")
-    for line in content.splitlines():
-        cleaned = line.strip().lstrip("> ").strip()
-        if cleaned.startswith(("主导", "负责", "设计", "搭建", "推动", "优化", "完成")):
-            return cleaned
-    return ""
-
-
 def _upsert_project_experience(
     collected: dict,
     project_name: str,
@@ -271,47 +256,30 @@ def _upsert_project_experience(
 
 
 def _harvest_projects_from_messages(messages: list) -> list[dict]:
-    """从对话里兜底抽取经历：
-    - AI 按 WRAP prompt 产出的格式里有 "🧷 **试着这么写**：[bullet]"，抽 bullet
-    - 用户原话里启发式抽项目名（"做X时/我在X项目/X 项目"）
-    没有 AI bullet 时不返回，避免展示未包装的原文。
-    """
-    user_snippets: list[str] = []
-    ai_bullets: list[str] = []
-    for m in messages:
-        content = m.content if isinstance(m.content, str) else str(m.content)
-        if isinstance(m, HumanMessage):
-            user_snippets.append(content)
-        elif isinstance(m, AIMessage):
-            # 匹配 "🧷 **试着这么写**：xxx" 后到下个空行/换行的内容
-            for match in _re.finditer(
-                r"🧷[^:：]*[:：]\s*\*?\*?([^*\n]+?)(?:\n\n|\n>|$)", content
-            ):
-                bullet = match.group(1).strip(" *")
-                if bullet and len(bullet) > 10:
-                    ai_bullets.append(bullet)
-            # 备选格式：含 "STAR" 或大段 bullet 的 AI 回复，前 200 字
-            if not ai_bullets and ("STAR" in content or "**" in content):
-                first_para = content.split("\n\n", 1)[0].strip()
-                if len(first_para) > 30:
-                    ai_bullets.append(first_para[:240])
-
-    if not ai_bullets:
-        return []
-
-    # 启发式项目名
-    joined_user = "\n".join(user_snippets)
-    project_name = _guess_project_name(joined_user) or "对话产出经历"
-    description = "\n".join(f"• {b}" for b in ai_bullets[:3])
-    return [
-        {
-            "name": project_name,
-            "role": "",
-            "start_date": "",
-            "end_date": "",
-            "description": description,
-        }
-    ]
+    """When extraction missed an experience, keep only the user's own wording."""
+    for message in reversed(messages):
+        if not isinstance(message, HumanMessage) or not isinstance(
+            message.content, str
+        ):
+            continue
+        snippet = message.content.strip()
+        mention = _re.search(
+            r"(?:我(?!司)|本人|自己)[^。\n]{0,32}?"
+            r"(?:做过|参与|负责|开发|搭建|设计|实现|完成|组织|运营|主导|整理)",
+            snippet,
+        )
+        if not mention or _re.search(r"想|希望|计划|准备|打算", mention.group(0)):
+            continue
+        return [
+            {
+                "name": _guess_project_name(snippet) or "对话中描述的经历",
+                "role": "",
+                "start_date": "",
+                "end_date": "",
+                "description": snippet,
+            }
+        ]
+    return []
 
 
 def _has_minimum_info(collected: dict) -> bool:
@@ -375,10 +343,69 @@ async def _extract_info_from_message(
         text = response.content.strip()
         if text.startswith("```"):
             text = text.split("\n", 1)[1].rsplit("```", 1)[0]
-        return json.loads(text)
+        parsed = json.loads(text)
+        if (
+            not isinstance(parsed, dict)
+            or set(parsed) != set(current)
+            or any(
+                not isinstance(parsed[key], type(value))
+                for key, value in current.items()
+            )
+        ):
+            logger.warning("Info extraction returned an incomplete structure")
+            return current
+        if not _extracted_facts_have_source(parsed, current, message):
+            logger.warning("Info extraction introduced unsupported wording")
+            return current
+        return parsed
     except Exception as e:
-        logger.warning(f"Info extraction failed: {e}")
+        logger.warning("Info extraction failed: %s", type(e).__name__)
         return current
+
+
+def _extracted_facts_have_source(parsed: dict, current: dict, message: str) -> bool:
+    """Reject new text that cannot be found in the user's words or saved facts."""
+
+    def leaves(value: Any):
+        if isinstance(value, dict):
+            for item in value.values():
+                yield from leaves(item)
+        elif isinstance(value, list):
+            for item in value:
+                yield from leaves(item)
+        elif isinstance(value, str) and value.strip():
+            yield value
+
+    def normalized(value: str) -> str:
+        return _re.sub(r"[\s,，。；;:：•*\-]", "", value).casefold()
+
+    source_units = [
+        normalized(clause)
+        for source in (message, *leaves(current))
+        for clause in _re.split(r"[,，。；;!?？！\n]", source)
+        if normalized(clause)
+    ]
+
+    def supported(claim: str) -> bool:
+        for source in source_units:
+            for match in _re.finditer(_re.escape(claim), source):
+                prefix = source[: match.start()]
+                if _re.search(
+                    r"(?:没有|并未|从未|未|没|不曾|不)"
+                    r"(?:独立|直接|实际|真正|具体|亲自|主要|单独)?$"
+                    r"|(?:不是|并非)(?:我|本人|自己)?$",
+                    prefix,
+                ):
+                    continue
+                return True
+        return False
+
+    for value in leaves(parsed):
+        for claim in _re.split(r"[,，。；;\n]", value):
+            claim = normalized(claim)
+            if claim and not supported(claim):
+                return False
+    return True
 
 
 # ── 阶段专属系统提示 ──────────────────────────────────────────────────────────
@@ -405,7 +432,7 @@ STAGE_PROMPTS = {
 
 行为规范：
 - **第一步**：给一条 STAR-V 格式 bullet（30-60字），用户原话的核心动作+场景+结果+对应 JD 能力点
-  - 如果用户没给数字，用定性描述（"显著提升""覆盖多类"），**绝对不要编造数字**
+  - 如果用户没给结果，就只写动作和已知产出；不得暗示「显著提升」「推动上线」等未证实的结果
 - **第二步**：如果缺少真实数字，追问 1 个最关键的量化问题（"跑过多少条？发现几类问题？影响多少用户？"）；在用户回答前保持定性描述
 - **第三步**：最后问「这条能用吗？还有哪些项目也能这样挖？」
 
@@ -511,9 +538,9 @@ STAGE_PROMPTS = {
 
 展示格式：
 直接输出简历内容，之后问用户「这个版本你觉得怎么样？要调整什么吗？」""",
-    "EVALUATING": """你是「胡话简历」严格评估官，当前阶段：简历评分。
+    "EVALUATING": """你是「胡话简历」的投递前核对助手。
 
-你已经有了简历草稿和目标JD。现在用ATS+HR双维度评分。
+你已经有了简历草稿和目标JD。只检查当前简历中可核查的事实和缺项。
 
 检查展示格式：
 ✅ 已有证据
@@ -849,14 +876,12 @@ async def collecting_node(state: ResumeState, llm: ChatOpenAI) -> dict:
         )
         response = await llm.ainvoke([sys_msg] + messages)
 
-        # 规则化落地：直接把这条经历 append 到 collected.projects，不再依赖 _extract_info_from_message
-        # 的 LLM 静默提取（它经常失败导致 projects 永远空、Triage 一直触发 ASK_EXPERIENCE）。
+        # 只保存用户原话。面向用户的包装建议可能包含模型推断，不能当成事实写入简历。
         project_name = _guess_project_name(snippet) or "对话产出经历"
-        wrapped_description = _extract_wrapped_bullet(response.content) or snippet
         _upsert_project_experience(
             collected=collected,
             project_name=project_name,
-            description=wrapped_description,
+            description=snippet,
             raw_snippet=snippet,
         )
         base_update["collected_info"] = collected
@@ -909,8 +934,10 @@ def _user_explicitly_asks(text: str) -> bool:
     return any(kw in text for kw in keywords)
 
 
-async def building_node(state: ResumeState, llm: ChatOpenAI) -> dict:
-    """阶段3：从同一份结构化数据生成预览、聊天文本和导出源。"""
+async def _build_canonical_resume_data(
+    state: ResumeState, llm: ChatOpenAI
+) -> tuple[dict, dict]:
+    """Build one canonical resume from collected facts, at most one editor call."""
     collected = state.get("collected_info") or _empty_collected_info()
     jd_info = state.get("jd_info", {})
     resume_strategy = state.get("resume_strategy") or build_resume_strategy(
@@ -934,6 +961,12 @@ async def building_node(state: ResumeState, llm: ChatOpenAI) -> dict:
 
     editor_llm = _make_non_streaming_llm(llm, temperature=0)
     polished = await run_editor(serialized, editor_llm)
+    return polished, resume_strategy
+
+
+async def building_node(state: ResumeState, llm: ChatOpenAI) -> dict:
+    """阶段3：从同一份结构化数据生成预览、聊天文本和导出源。"""
+    polished, resume_strategy = await _build_canonical_resume_data(state, llm)
     canonical_text = resume_to_text(polished)
     logger.info(
         f"[building/return] resume_data projects={len(polished.get('projects', []))} "
@@ -950,27 +983,102 @@ async def building_node(state: ResumeState, llm: ChatOpenAI) -> dict:
     }
 
 
-async def evaluating_node(state: ResumeState, llm: ChatOpenAI) -> dict:
-    """阶段4：评分"""
-    resume_data = state.get("resume_data") or _serialize_to_resume_data(state)
-    messages = state["messages"]
-
-    # 检查用户是否选择继续修改
-    last_human = next(
-        (m.content for m in reversed(messages) if isinstance(m, HumanMessage)), ""
+def _user_wants_export(text: str) -> bool:
+    """Only treat a standalone confirmation as export, not an edit sentence."""
+    cleaned = _re.sub(r"\s+", "", text.strip()).rstrip("。！!")
+    return bool(
+        _re.fullmatch(
+            r"(?:好[，,])?(?:直接)?(?:导出|下载)(?:当前版本|简历|Word|PDF)?吧?"
+            r"|(?:好了|可以了?|满意了?|不改了?|不用改|就这样|确认|完成)"
+            r"(?:[，,]?(?:直接)?(?:导出|下载)(?:当前版本|简历|Word|PDF)?吧?)?",
+            cleaned,
+            flags=_re.IGNORECASE,
+        )
     )
-    if any(w in last_human for w in ["导出", "好了", "可以", "满意", "不改"]):
-        return {"messages": [AIMessage(content="好，准备导出！")], "stage": "EXPORT"}
 
-    checks = review_resume(resume_data, state.get("jd_info") or None)
+
+def _user_asks_review(text: str) -> bool:
+    cleaned = _re.sub(r"\s+", "", text.strip()).rstrip("。？！!?")
+    return bool(
+        _re.fullmatch(
+            r"(?:请)?(?:帮我)?(?:检查|核对|评估|看看)(?:一下|下)?"
+            r"(?:这版|简历|当前版本)?(?:有哪些问题|问题|怎么样)?"
+            r"|(?:这版|简历|当前版本)(?:怎么样|有哪些问题)",
+            cleaned,
+        )
+    )
+
+
+def _review_reply(resume_data: dict, jd_info: dict | None) -> tuple[str, list[str]]:
+    checks = review_resume(resume_data, jd_info)
     reply = (
         "🔎 **投递前核对**\n\n"
         + "\n".join(f"{i + 1}. {item}" for i, item in enumerate(checks))
         + "\n\n这些是基于当前内容的检查，不代表真实 ATS 分数或面试概率。"
         + "\n\n要继续补充，还是导出当前版本？"
     )
+    return reply, checks
+
+
+async def evaluating_node(state: ResumeState, llm: ChatOpenAI) -> dict:
+    """阶段4：接收修订、重建唯一简历数据并做投递前核对。"""
+    resume_data = state.get("resume_data") or _serialize_to_resume_data(state)
+    messages = state["messages"]
+
+    last_human = next(
+        (m.content for m in reversed(messages) if isinstance(m, HumanMessage)), ""
+    )
+    if _user_wants_export(last_human):
+        return {"messages": [AIMessage(content="好，准备导出！")], "stage": "EXPORT"}
+
+    if last_human.strip() in {"继续优化", "优化", "继续补充", "补充", "修改"}:
+        return {
+            "messages": [
+                AIMessage(
+                    content="想调整哪一处？请直接告诉我需要补充或更正的真实经历、技能或联系方式。"
+                )
+            ]
+        }
+
+    if not _user_asks_review(last_human):
+        collected = state.get("collected_info") or _empty_collected_info()
+        if last_human.strip():
+            extract_llm = _make_non_streaming_llm(llm, temperature=0)
+            updated = await _extract_info_from_message(
+                last_human, collected, extract_llm
+            )
+            if updated != collected:
+                revised_state = {**state, "collected_info": updated}
+                rebuilt, strategy = await _build_canonical_resume_data(
+                    revised_state, llm
+                )
+                canonical_text = resume_to_text(rebuilt)
+                review_text, checks = _review_reply(
+                    rebuilt, state.get("jd_info") or None
+                )
+                return {
+                    "messages": [
+                        AIMessage(content=canonical_text + "\n\n---\n\n" + review_text)
+                    ],
+                    "stage": "EVALUATING",
+                    "collected_info": updated,
+                    "resume_data": rebuilt,
+                    "resume_draft": canonical_text,
+                    "resume_strategy": strategy,
+                    "eval_result": {"checks": checks},
+                }
+            return {
+                "messages": [
+                    AIMessage(
+                        content="我还没找到可以直接写入简历的新事实。请指出要改的具体经历，以及你实际做了什么或取得了什么结果。"
+                    )
+                ]
+            }
+
+    reply, checks = _review_reply(resume_data, state.get("jd_info") or None)
     return {
         "messages": [AIMessage(content=reply)],
+        "resume_data": resume_data,
         "resume_draft": resume_to_text(resume_data),
         "eval_result": {"checks": checks},
     }
@@ -1068,7 +1176,7 @@ def get_graph(llm: ChatOpenAI) -> Any:
 
 
 async def stream_agent(messages: list[dict], session_id: str, llm: ChatOpenAI):
-    """流式运行 Agent，按 token yield 字符串"""
+    """Stream only public graph-node replies, never internal model tokens."""
     graph = get_graph(llm)
     config = {"configurable": {"thread_id": session_id}}
 
@@ -1080,36 +1188,28 @@ async def stream_agent(messages: list[dict], session_id: str, llm: ChatOpenAI):
     lc_msg = HumanMessage(content=last_msg["content"])
     input_state = {"messages": [lc_msg]}
 
-    full_response = ""
+    public_nodes = {"jd_input", "collecting", "building", "evaluating", "export"}
     try:
-        async for event in graph.astream_events(
-            input_state, config=config, version="v2"
+        async for update in graph.astream(
+            input_state, config=config, stream_mode="updates"
         ):
-            kind = event.get("event", "")
-            if kind == "on_chat_model_stream":
-                chunk = event.get("data", {}).get("chunk")
-                if chunk and chunk.content:
-                    full_response += chunk.content
-                    yield chunk.content
+            for node, output in update.items():
+                if node not in public_nodes or not isinstance(output, dict):
+                    continue
+                for message in output.get("messages") or []:
+                    if isinstance(message, AIMessage) and isinstance(
+                        message.content, str
+                    ):
+                        if message.content:
+                            yield message.content
     except Exception as e:
-        logger.error(f"agent stream error: {e}", exc_info=True)
-        yield f"\n\n[错误: {e}]"
+        logger.error("agent stream error: %s", type(e).__name__)
+        yield "生成失败，请稍后重试。"
         return
 
-    # 从 checkpoint 读取节点最终存储的 AI 消息
-    # - 无流式时（硬编码回复）：直接输出
-    # - 有流式时（decoder 内部 LLM）：追加节点格式化的过渡文字（若与流式内容不同）
+    # Persist the final graph state after the public reply has been sent.
     try:
         state = await graph.aget_state(config)
-        msgs = state.values.get("messages", []) if state else []
-        ai_msgs = [m for m in msgs if isinstance(m, AIMessage)]
-        if ai_msgs:
-            last_content = ai_msgs[-1].content
-            if not full_response:
-                yield last_content
-            elif last_content and last_content not in full_response:
-                # 节点格式化回复与流式内容不同，追加输出
-                yield "\n\n---\n" + last_content
         if state and state.values:
             from app.services.session_store import (
                 resume_data_has_content,

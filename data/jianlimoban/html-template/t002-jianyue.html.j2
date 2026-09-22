@@ -107,7 +107,7 @@
 </head>
 <body>
   <div class="header">
-    {% if basic_info.photo %}<div class="photo"><img src="{{ basic_info.photo|safe }}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;"></div>{% else %}<div class="photo">照片</div>{% endif %}
+    {% if basic_info.photo %}<div class="photo"><img src="{{ basic_info.photo }}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;"></div>{% else %}<div class="photo">照片</div>{% endif %}
     <div class="header-name-block">
       <div class="header-name">{{ basic_info.name }}</div>
       {% if basic_info.objective %}<div class="header-target">求职意向：{{ basic_info.objective }}</div>{% endif %}

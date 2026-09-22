@@ -3,7 +3,7 @@
 
 职责（单次 LLM 调用，输入 ResumeData 粗稿 → 输出优化后的 ResumeData）：
   1. skills 扁平列表 → skill_groups 分组（技术栈 / 产品方法 / AI 工具 / 内容运营 / 其他）
-  2. projects[].description 长段落 → polished_bullets 3-5 条 STAR 句
+  2. projects[].description 中已有的独立句子 → polished_bullets（仅摘取和排序）
   3. 根据背景推断 experience_section_title（校园经历 / 工作经历 / 过往经历）
 
 稳定性：15s 硬超时，LLM 任何异常都返回原始 ResumeData（不阻塞主流程）。
@@ -27,11 +27,32 @@ def _numbers(text: str) -> set[str]:
     return set(re.findall(r"\d+(?:[.,]\d+)?%?", text or ""))
 
 
+def _source_supported_bullets(description: str, bullets: list[str]) -> bool:
+    """Only accept whole source sentences; overlap alone cannot prove the same claim.
+
+    An LLM changing 「参与调研」 to 「主导调研」 keeps most words but changes the
+    candidate's responsibility. Extractive sentences are the safe first release.
+    """
+    if not description or not bullets or not all(isinstance(b, str) for b in bullets):
+        return False
+
+    def normalized(text: str) -> str:
+        return re.sub(r"\s+", "", text.strip().lstrip("-•* ").rstrip("。；;.!！ "))
+
+    source_units = {
+        normalized(sentence)
+        for line in description.splitlines()
+        for sentence in re.split(r"[。；;]", line)
+        if normalized(sentence)
+    }
+    return all(normalized(bullet) in source_units for bullet in bullets)
+
+
 class _ProjectPolish(BaseModel):
     name: str = Field(..., description="项目名，原样返回用于匹配")
     polished_bullets: list[str] = Field(
         default_factory=list,
-        description="3-5 条 STAR 格式 bullet，每条 ≤60 字，保留原数字，不编造",
+        description="仅摘取原 description 中完整句子，可排序，不改写事实或动词",
     )
 
 
@@ -84,12 +105,10 @@ EDITOR_SYSTEM = """你是「胡话简历」的简历美化师。读取下面的�
 projects 里既有项目又有活动时，按"项目经历"处理（多数场景用户关心的是项目部分）。
 不确定就返回空串，由模板使用默认。
 
-## 任务 3：projects description 压缩
-每个项目，把 description 长段落压成 **3-5 条 STAR bullet**：
-- 每条 ≤60 字
-- **保留原有数字和项目名，绝对不能编造新数字**
-- 每条以动词开头（主导 / 设计 / 完成 / 发现 / 推动 / 优化 等）
-- bullet 之间逻辑：洞察→方案→动作→结果 的顺序
+## 任务 3：projects description 整理
+只能从 description 中摘取完整的原句作为 bullet，可调整句子的先后顺序。
+原文写「参与」就保留「参与」，不得改成「负责」「主导」「推动上线」等更强的职责或结果。
+不得新增数字、项目名、动作或成果。原文没有可独立摘取的句子，就返回空数组，保留原文。
 
 返回时 `project_polishes[].name` 必须和输入项目的 name 完全一致，便于前端 match。
 
@@ -126,14 +145,25 @@ async def run_editor(resume_data: dict, llm: ChatOpenAI) -> dict:
         )
         return resume_data
     except Exception as e:
-        logger.warning(f"[editor/error] {type(e).__name__} {e}")
+        logger.warning("[editor/error] %s", type(e).__name__)
         return resume_data
 
     # 合并结果回 resume_data
     merged: dict[str, Any] = dict(resume_data)  # 浅拷贝
-    if result.skill_groups:
+    original_skills = list(resume_data.get("skills") or [])
+    grouped_skills = [
+        skill for group in result.skill_groups.values() for skill in group
+    ]
+    allowed_groups = {"技术栈", "产品方法", "AI 工具", "内容运营", "设计工具", "其他"}
+    if (
+        result.skill_groups
+        and set(result.skill_groups) <= allowed_groups
+        and sorted(grouped_skills) == sorted(original_skills)
+    ):
         merged["skill_groups"] = result.skill_groups
-    if result.experience_section_title:
+    elif result.skill_groups:
+        logger.warning("[editor/fact-check] rejected changed skills")
+    if result.experience_section_title in {"项目经历", "校园经历"}:
         merged["experience_section_title"] = result.experience_section_title
 
     # projects polished_bullets 按 name 匹配回填
@@ -145,13 +175,20 @@ async def run_editor(resume_data: dict, llm: ChatOpenAI) -> dict:
             bullets = name_to_bullets.get(p.get("name", ""), [])
             original_numbers = _numbers(p.get("description", ""))
             introduced_numbers = _numbers("\n".join(bullets)) - original_numbers
-            if bullets and not introduced_numbers:
+            if (
+                bullets
+                and not introduced_numbers
+                and _source_supported_bullets(p.get("description", ""), bullets)
+            ):
                 p_copy["polished_bullets"] = bullets
             elif introduced_numbers:
                 logger.warning(
-                    "[editor/fact-check] rejected new numbers project=%r numbers=%s",
-                    p.get("name", ""),
-                    sorted(introduced_numbers),
+                    "[editor/fact-check] rejected new numbers count=%s",
+                    len(introduced_numbers),
+                )
+            elif bullets:
+                logger.warning(
+                    "[editor/fact-check] rejected unsupported project rewrite"
                 )
             new_projects.append(p_copy)
         merged["projects"] = new_projects

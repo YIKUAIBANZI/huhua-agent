@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     LLM_BASE_URL: str | None = None  # DeepSeek 等自定义 base_url
     LLM_TEMPERATURE: float = 0.7
 
+    # 用户主动点击岗位匹配时才调用 Jev；凭证仅由服务端环境变量读取。
+    JEV_API_KEY: str = ""
+    JEV_TIMEOUT_SECONDS: float = 8.0
+
     # RAG
     CHROMA_DIR: str = str(PROJECT_DIR / "data" / "chroma_db")
     RAG_TOP_K: int = 5
