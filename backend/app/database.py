@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from pathlib import Path
 from app.config import get_settings
 
 
@@ -30,6 +31,8 @@ SessionLocal = sessionmaker(bind=engine)
 def init_db():
     """建表，启动时调用一次"""
     from app.models import models  # noqa: F401 — 确保 model 被注册
+    if engine.dialect.name == "sqlite" and engine.url.database not in (None, "", ":memory:"):
+        Path(engine.url.database).parent.mkdir(parents=True, exist_ok=True)
     Base.metadata.create_all(bind=engine)
 
 
