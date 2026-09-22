@@ -20,13 +20,16 @@ from langgraph.graph.message import add_messages
 from typing_extensions import TypedDict
 
 from app.agents.decoder_chain import run_decoder_chain
-from app.agents.evaluator_chain import run_evaluator_chain
 from app.agents.triage_chain import (
     TriageAction,
     build_state_for_triage,
     run_triage,
 )
-from app.agents.wrapper_chain import run_wrapper_chain
+from app.services.resume_review import resume_to_text, review_resume
+from app.services.resume_strategy import (
+    build_resume_strategy,
+    format_strategy_for_prompt,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +46,7 @@ class ResumeState(TypedDict):
     collected_info: dict
     resume_draft: str
     resume_data: dict  # 序列化后的 ResumeData（给 /resume 渲染用），building_node 产出
+    resume_strategy: dict  # 简历策略：JD 匹配型 / 能力展示型
     eval_result: dict
     # ── Triage 相关字段 ─────────────────────────────────────────────
     jd_skipped: bool  # 用户明确跳过 JD
@@ -72,6 +76,7 @@ def _init_state() -> ResumeState:
         "collected_info": _empty_collected_info(),
         "resume_draft": "",
         "resume_data": {},
+        "resume_strategy": {},
         "eval_result": {},
         "jd_skipped": False,
         "jd_keywords": [],
@@ -132,6 +137,11 @@ def _serialize_to_resume_data(state: "ResumeState") -> dict:
     messages = state.get("messages", [])
     jd_info = state.get("jd_info", {}) or {}
     jd_kw = state.get("jd_keywords") or []
+    resume_strategy = state.get("resume_strategy") or build_resume_strategy(
+        jd_info=jd_info,
+        jd_keywords=jd_kw,
+        has_jd=bool(jd_info),
+    )
 
     base_basic = collected.get("basic_info") or {}
     opt = _extract_opt_basic_info(messages)
@@ -205,6 +215,7 @@ def _serialize_to_resume_data(state: "ResumeState") -> dict:
         "skills": list(collected.get("skills", [])),
         "certificates": list(collected.get("certificates", [])),
         "self_evaluation": collected.get("personal_summary", ""),
+        "resume_strategy": resume_strategy,
     }
 
 
@@ -215,6 +226,48 @@ def _guess_project_name(text: str) -> str:
         text,
     )
     return m.group(1) if m else ""
+
+
+def _extract_wrapped_bullet(content: str) -> str:
+    """从 COLLECTING_WRAP 回复里提取可进入 ResumeData 的第一条 bullet。"""
+    if not content:
+        return ""
+    match = _re.search(r"🧷[^\n:：]*[:：]\s*(.+)", content)
+    if match:
+        return match.group(1).strip(" *")
+    for line in content.splitlines():
+        cleaned = line.strip().lstrip("> ").strip()
+        if cleaned.startswith(("主导", "负责", "设计", "搭建", "推动", "优化", "完成")):
+            return cleaned
+    return ""
+
+
+def _upsert_project_experience(
+    collected: dict,
+    project_name: str,
+    description: str,
+    raw_snippet: str,
+) -> None:
+    """把包装后的经历写入 collected.projects；同名项目追加，避免覆盖上下文。"""
+    projects = collected.setdefault("projects", [])
+    for project in projects:
+        if project.get("name") == project_name:
+            existing = project.get("description", "")
+            if description and description not in existing:
+                project["description"] = (
+                    f"{existing}\n{description}" if existing else description
+                )
+            return
+    projects.append(
+        {
+            "name": project_name,
+            "role": "",
+            "start_date": "",
+            "end_date": "",
+            "description": description or raw_snippet,
+            "raw_description": raw_snippet,
+        }
+    )
 
 
 def _harvest_projects_from_messages(messages: list) -> list[dict]:
@@ -338,27 +391,28 @@ STAGE_PROMPTS = {
 行为规范：
 - 如果用户还没给JD，简短问一句：「请把目标岗位的招聘JD粘贴给我」
 - 如果用户给了JD文字（超过50字的大段文字），回复「收到，正在解读...」然后停止，系统会自动切换到解读阶段
-- 如果用户只说了岗位方向没给JD（如「产品经理」），告知：「我需要具体JD原文来帮你精准匹配，你能找到一个目标职位的招聘详情页，把文字粘过来吗？」
+- 如果用户只说了岗位方向没给JD（如「产品经理」），不要卡住用户；进入能力展示型简历，围绕该方向挖经历
 - 回复简短，一次只问一件事""",
     "COLLECTING": """你是「胡话简历」AI助手，当前阶段：收集用户经历（已废弃，请用 COLLECTING_* 子 prompt）。""",
     # ── Triage 分支后的子 prompt ───────────────────────────────────
     "COLLECTING_WRAP": """你是「胡话简历」的经历挖掘师，当前阶段：把用户刚说的经历**直接包装成可放进简历的 bullet**。
 
 目标岗位要求：{jd_requirements}
+简历策略：
+{strategy_summary}
 用户刚说的经历片段：{experience_snippet}
 当前已收集：{collected_summary}
 
 行为规范：
 - **第一步**：给一条 STAR-V 格式 bullet（30-60字），用户原话的核心动作+场景+结果+对应 JD 能力点
   - 如果用户没给数字，用定性描述（"显著提升""覆盖多类"），**绝对不要编造数字**
-  - 如果确实需要量化，补一个带 `*` 标记的估算数字（例："约 30%*"）
-- **第二步**：追问 1 个最关键的量化数字问题（"跑过多少条？发现几类问题？影响多少用户？"）让用户把 `*` 换成真数字
+- **第二步**：如果缺少真实数字，追问 1 个最关键的量化问题（"跑过多少条？发现几类问题？影响多少用户？"）；在用户回答前保持定性描述
 - **第三步**：最后问「这条能用吗？还有哪些项目也能这样挖？」
 
 格式：
 > 🧷 **试着这么写**：[bullet]
 >
-> 👉 **帮我核实一个数字**：[针对这条 bullet 的具体问题]
+> 👉 **可以补充一个数字吗**：[针对这条 bullet 的具体问题]
 >
 > 还有类似的经历吗？
 
@@ -369,11 +423,13 @@ STAGE_PROMPTS = {
     "COLLECTING_ASK_EXP": """你是「胡话简历」AI助手，当前阶段：追问经历。
 
 目标岗位要求：{jd_requirements}
+简历策略：
+{strategy_summary}
 当前已收集：{collected_summary}
 
 行为规范：
 - 每次只问一件事
-- 优先问 JD 里最重要的能力对应的经历（如 JD 要求 AB 测试就问"做过类似验证吗？"）
+- 优先问策略里最重要的能力证据；有 JD 时问 JD 能力对应经历，没有 JD 时问最能展现能力的代表经历
 - 如果用户之前说过"我平时会 / 我习惯"这类软经历，点名追问（"你刚说会先跑体验看不合理——展开说说这个过程？"）
 - 不要一次抛 3 个问题，用户会被淹没
 - 已有 ≥1 条经历后，可以问"还想补充点什么？或者直接开始生成？"
@@ -384,6 +440,8 @@ STAGE_PROMPTS = {
     "COLLECTING_SUGGEST": """你是「胡话简历」AI助手，当前阶段：兜底推荐方向。
 
 目标岗位要求：{jd_requirements}
+简历策略：
+{strategy_summary}
 已尝试挖掘用户经历但无果（dig_attempts={dig_attempts}）。
 
 行为规范：
@@ -457,12 +515,10 @@ STAGE_PROMPTS = {
 
 你已经有了简历草稿和目标JD。现在用ATS+HR双维度评分。
 
-评分展示格式：
-📊 ATS得分：XX/60 | HR得分：XX/40 | 总分：XX/100
-📈 面试通过率预测：XX%
-
-✅ 亮点（2条）
-⚠️ 需改进（2-3条，按优先级排序）
+检查展示格式：
+✅ 已有证据
+⚠️ 待补信息或待核实事实
+📄 导出与解析风险
 
 之后问用户：「要继续优化还是直接导出？」""",
     "EXPORT": """你是「胡话简历」AI助手，当前阶段：导出简历。
@@ -481,13 +537,18 @@ STAGE_PROMPTS = {
 
 def _jd_requirements_summary(state: ResumeState) -> str:
     """返回可塞进 prompt 的 JD 关键要求摘要（有 JD 时用 must_highlight，轻量模式用关键词，都没有时兜底）。"""
+    strategy = state.get("resume_strategy") or {}
     if state.get("jd_info"):
         reqs = state["jd_info"].get("resume_strategy", {}).get("must_highlight", [])
         if reqs:
             return "、".join(reqs)
+        if strategy.get("recruiter_priorities"):
+            return "、".join(strategy["recruiter_priorities"][:5])
         return "见已解读JD"
     if state.get("jd_keywords"):
         return "（轻量模式）岗位关键词：" + "、".join(state["jd_keywords"])
+    if strategy.get("recruiter_priorities"):
+        return "（能力展示模式）" + "、".join(strategy["recruiter_priorities"][:5])
     return "（暂无 JD，走通用简历规则）"
 
 
@@ -499,6 +560,9 @@ def _get_stage_system(
     collected = state.get("collected_info") or _empty_collected_info()
     fmt_vars = {
         "jd_requirements": _jd_requirements_summary(state),
+        "strategy_summary": format_strategy_for_prompt(
+            state.get("resume_strategy") or {}
+        ),
         "collected_summary": _collected_summary(collected),
         "experience_snippet": experience_snippet or "",
         "dig_attempts": state.get("dig_attempts", 0),
@@ -513,6 +577,47 @@ def _get_stage_system(
 
 def _has_jd_text(text: str) -> bool:
     return len(text.strip()) > 80
+
+
+ROLE_DIRECTION_KEYWORDS = [
+    "产品经理",
+    "后端",
+    "前端",
+    "工程师",
+    "运营",
+    "市场",
+    "金融",
+    "投行",
+    "审计",
+    "咨询",
+    "设计",
+    "销售",
+    "商务",
+    "供应链",
+    "教师",
+    "教培",
+]
+
+
+def _extract_role_direction_keywords(text: str) -> list[str]:
+    found = [kw for kw in ROLE_DIRECTION_KEYWORDS if kw in text]
+    if found:
+        return found[:4]
+    cleaned = text.strip(" 。,.，")
+    return [cleaned] if cleaned else []
+
+
+def _looks_like_role_direction(text: str) -> bool:
+    """无 JD 场景的确定性兜底：短句岗位方向直接进入能力展示模式。"""
+    text = text.strip()
+    if not text or _has_jd_text(text):
+        return False
+    has_role = any(kw in text for kw in ROLE_DIRECTION_KEYWORDS)
+    has_intent = any(
+        kw in text
+        for kw in ("想投", "应聘", "求职", "目标", "岗位", "方向", "校招", "实习")
+    )
+    return has_role and (has_intent or len(text) <= 16)
 
 
 def _make_non_streaming_llm(
@@ -551,11 +656,14 @@ async def _run_decoder_and_build_reply(
         )
         strategy = jd_info.get("resume_strategy", {})
         must = "、".join(strategy.get("must_highlight", []))
+        resume_strategy = build_resume_strategy(jd_info=jd_info, has_jd=True)
+        priorities = "、".join(resume_strategy.get("recruiter_priorities", [])[:4])
         reply = (
             f"**JD解读完毕** 🔍\n\n"
             f"{decoded_text}\n\n"
             f"**总结：** {summary}\n\n"
             f"**简历必须突出：** {must}\n\n"
+            f"**生成策略：** {priorities}\n\n"
             f"---\n现在告诉我你的经历。先说说你做过什么工作或项目？"
         )
         return jd_info, reply
@@ -580,6 +688,23 @@ async def jd_input_node(state: ResumeState, llm: ChatOpenAI) -> dict:
         response = await llm.ainvoke([sys_msg] + messages)
         return {"messages": [response]}
 
+    if _looks_like_role_direction(last_human):
+        jd_keywords = _extract_role_direction_keywords(last_human)
+        resume_strategy = build_resume_strategy(jd_keywords=jd_keywords, has_jd=False)
+        priorities = "、".join(resume_strategy.get("recruiter_priorities", [])[:4])
+        reply = (
+            f"好，先按「{'、'.join(jd_keywords)}」做能力展示型简历。\n\n"
+            f"我会优先证明：{priorities}。\n\n"
+            "先说一段最能代表你能力的经历：项目、实习、课程作品、比赛都可以。"
+        )
+        return {
+            "messages": [AIMessage(content=reply)],
+            "stage": "COLLECTING",
+            "jd_skipped": True,
+            "jd_keywords": jd_keywords,
+            "resume_strategy": resume_strategy,
+        }
+
     # 先跑 Triage
     triage_params = build_state_for_triage(state)
     triage_llm = _make_non_streaming_llm(llm, temperature=0)
@@ -593,11 +718,13 @@ async def jd_input_node(state: ResumeState, llm: ChatOpenAI) -> dict:
     # 分支 1：用户粘贴了 JD 原文 → 走解码
     if action == TriageAction.DECODE_JD:
         jd_info, reply = await _run_decoder_and_build_reply(last_human, llm)
+        resume_strategy = build_resume_strategy(jd_info=jd_info, has_jd=True)
         return {
             "messages": [AIMessage(content=reply)],
             "stage": "COLLECTING",
             "jd_text": last_human,
             "jd_info": jd_info,
+            "resume_strategy": resume_strategy,
         }
 
     # 分支 2：用户明确跳过 JD（可能顺便给了岗位关键词）
@@ -606,8 +733,15 @@ async def jd_input_node(state: ResumeState, llm: ChatOpenAI) -> dict:
         if decision.jd_keywords:
             update["jd_keywords"] = decision.jd_keywords
             update["stage"] = "COLLECTING"
+            resume_strategy = build_resume_strategy(
+                jd_keywords=decision.jd_keywords,
+                has_jd=False,
+            )
+            update["resume_strategy"] = resume_strategy
+            priorities = "、".join(resume_strategy.get("recruiter_priorities", [])[:4])
             reply = (
                 f"好，收到。岗位方向：{'、'.join(decision.jd_keywords)}。\n\n"
+                f"我会按「能力展示型简历」来做，优先证明：{priorities}。\n\n"
                 f"现在告诉我你的经历——做过什么工作、项目、或者平时有什么习惯跟这个方向相关的都行。"
             )
         else:
@@ -615,6 +749,7 @@ async def jd_input_node(state: ResumeState, llm: ChatOpenAI) -> dict:
             sys_msg = SystemMessage(content=_get_stage_system("LIGHT_MODE_ASK", state))
             response = await llm.ainvoke([sys_msg] + messages)
             update["messages"] = [response]
+            update["stage"] = "JD_INPUT"
             return update
         update["messages"] = [AIMessage(content=reply)]
         return update
@@ -676,8 +811,14 @@ async def collecting_node(state: ResumeState, llm: ChatOpenAI) -> dict:
     ):
         user_asked = True
 
+    resume_strategy = state.get("resume_strategy") or build_resume_strategy(
+        jd_info=state.get("jd_info") or None,
+        jd_keywords=state.get("jd_keywords") or [],
+        has_jd=bool(state.get("jd_info")),
+    )
     base_update: dict[str, Any] = {
         "collected_info": collected,
+        "resume_strategy": resume_strategy,
         "dig_attempts": new_dig_attempts,
         "user_asked_for_suggestion": user_asked,
     }
@@ -711,18 +852,14 @@ async def collecting_node(state: ResumeState, llm: ChatOpenAI) -> dict:
         # 规则化落地：直接把这条经历 append 到 collected.projects，不再依赖 _extract_info_from_message
         # 的 LLM 静默提取（它经常失败导致 projects 永远空、Triage 一直触发 ASK_EXPERIENCE）。
         project_name = _guess_project_name(snippet) or "对话产出经历"
-        existing_names = {p.get("name") for p in collected.get("projects", [])}
-        if project_name not in existing_names:
-            collected.setdefault("projects", []).append(
-                {
-                    "name": project_name,
-                    "role": "",
-                    "start_date": "",
-                    "end_date": "",
-                    "description": snippet,
-                }
-            )
-            base_update["collected_info"] = collected
+        wrapped_description = _extract_wrapped_bullet(response.content) or snippet
+        _upsert_project_experience(
+            collected=collected,
+            project_name=project_name,
+            description=wrapped_description,
+            raw_snippet=snippet,
+        )
+        base_update["collected_info"] = collected
 
         base_update["messages"] = [response]
         return base_update
@@ -744,9 +881,11 @@ async def collecting_node(state: ResumeState, llm: ChatOpenAI) -> dict:
     # 分支 E：兜底—— triage 返回了 JD 相关 action（用户中途补贴 JD 等）
     if action == TriageAction.DECODE_JD:
         jd_info, reply = await _run_decoder_and_build_reply(last_human, llm)
+        resume_strategy = build_resume_strategy(jd_info=jd_info, has_jd=True)
         base_update["messages"] = [AIMessage(content=reply)]
         base_update["jd_text"] = last_human
         base_update["jd_info"] = jd_info
+        base_update["resume_strategy"] = resume_strategy
         return base_update
 
     # 兜底：按 ASK_EXP 走
@@ -771,75 +910,21 @@ def _user_explicitly_asks(text: str) -> bool:
 
 
 async def building_node(state: ResumeState, llm: ChatOpenAI) -> dict:
-    """阶段3：包装简历草稿"""
+    """阶段3：从同一份结构化数据生成预览、聊天文本和导出源。"""
     collected = state.get("collected_info") or _empty_collected_info()
     jd_info = state.get("jd_info", {})
-    industry = jd_info.get("industry", "互联网")
-
-    # 合并所有经历类型为待包装列表
-    all_experiences = []
-    for exp in collected.get("work_experience", []):
-        desc = exp.get("description", "") or str(exp)
-        if desc:
-            all_experiences.append(
-                f"【工作经历】{exp.get('company', '')} {exp.get('title', '')} {exp.get('duration', '')}\n{desc}"
-            )
-    for exp in collected.get("internship", []):
-        desc = exp.get("description", "") or str(exp)
-        if desc:
-            all_experiences.append(
-                f"【实习经历】{exp.get('company', '')} {exp.get('title', '')} {exp.get('duration', '')}\n{desc}"
-            )
-    for exp in collected.get("projects", []):
-        desc = exp.get("description", "") or str(exp)
-        if desc:
-            all_experiences.append(
-                f"【项目经历】{exp.get('name', '')} {exp.get('role', '')}\n{desc}"
-            )
-
-    # 每条经历过 wrapper_chain 包装（非流式）——走 LLM_STRUCTURED_MODEL，
-    # 否则 qwen3.6-plus 的 with_structured_output 单次要 12s，3 条 bullet 就炸了
-    logger.info("[building] 开始 wrap 经历")
-    wrapper_llm = _make_non_streaming_llm(llm, temperature=llm.temperature)
-    wrapped_bullets = []
-    for exp_text in all_experiences[:3]:
-        try:
-            result = await run_wrapper_chain(
-                experience=exp_text, industry=industry, llm=wrapper_llm
-            )
-            wrapped_bullets.append(
-                result.get("wrapped", exp_text)
-                if not result.get("needs_followup")
-                else exp_text
-            )
-        except Exception as e:
-            logger.error(f"wrapper error: {e}")
-            wrapped_bullets.append(exp_text)
-
-    # 补充技能和自我评价
-    skills_text = "、".join(collected.get("skills", []))
-    summary_text = collected.get("personal_summary", "")
-
-    sys_msg = SystemMessage(content=_get_stage_system("BUILDING", state))
-    build_prompt = (
-        f"以下是用户提供的 {len(wrapped_bullets)} 条经历（只有这些，不得添加），请整合成完整简历：\n\n"
-        + "\n\n".join(f"【经历{i + 1}】\n{b}" for i, b in enumerate(wrapped_bullets))
-        + (f"\n\n【技能特长】{skills_text}" if skills_text else "")
-        + (f"\n\n【自我评价】{summary_text}" if summary_text else "")
-        + "\n\n注意：基本信息（姓名/联系方式）用户未提供，请用[待填写]占位。"
-        + "\n保留bullet中原有的`*`标记（表示AI估算数字，非用户提供），不要删除它们。"
-        + "\n简历末尾加一行：`📝 标*的数字为AI参考建议，请核实后替换为真实数据`"
+    resume_strategy = state.get("resume_strategy") or build_resume_strategy(
+        jd_info=jd_info or None,
+        jd_keywords=state.get("jd_keywords") or [],
+        has_jd=bool(jd_info),
     )
-    response = await llm.ainvoke(
-        [sys_msg] + state["messages"] + [HumanMessage(content=build_prompt)]
-    )
-
-    # 聊天产出 → ResumeData 粗稿（供 /resume 渲染）
+    # 所有下游输出都从 ResumeData 生成，避免三份内容逐渐分叉。
     serialized = _serialize_to_resume_data(
         {
             **state,
             "collected_info": collected,
             "jd_info": jd_info,
+            "resume_strategy": resume_strategy,
         }
     )
 
@@ -849,6 +934,7 @@ async def building_node(state: ResumeState, llm: ChatOpenAI) -> dict:
 
     editor_llm = _make_non_streaming_llm(llm, temperature=0)
     polished = await run_editor(serialized, editor_llm)
+    canonical_text = resume_to_text(polished)
     logger.info(
         f"[building/return] resume_data projects={len(polished.get('projects', []))} "
         f"skill_groups={len(polished.get('skill_groups', {}))} "
@@ -856,17 +942,17 @@ async def building_node(state: ResumeState, llm: ChatOpenAI) -> dict:
     )
 
     return {
-        "messages": [response],
+        "messages": [AIMessage(content=canonical_text)],
         "stage": "EVALUATING",
-        "resume_draft": response.content,
+        "resume_draft": canonical_text,
         "resume_data": polished,
+        "resume_strategy": resume_strategy,
     }
 
 
 async def evaluating_node(state: ResumeState, llm: ChatOpenAI) -> dict:
     """阶段4：评分"""
-    resume_draft = state.get("resume_draft", "")
-    jd_text = state.get("jd_text", "")
+    resume_data = state.get("resume_data") or _serialize_to_resume_data(state)
     messages = state["messages"]
 
     # 检查用户是否选择继续修改
@@ -876,38 +962,18 @@ async def evaluating_node(state: ResumeState, llm: ChatOpenAI) -> dict:
     if any(w in last_human for w in ["导出", "好了", "可以", "满意", "不改"]):
         return {"messages": [AIMessage(content="好，准备导出！")], "stage": "EXPORT"}
 
-    # 运行评分
-    try:
-        result = await run_evaluator_chain(resume_draft, llm, jd_text or None)
-        ats = result.get("ats_score", {}).get("total", 0)
-        hr = result.get("hr_score", {}).get("total", 0)
-        total = result.get("total_score", 0)
-        prediction = result.get("pass_prediction", {})
-        roadmap = result.get("improvement_roadmap", [])[:3]
-
-        improvements = "\n".join(
-            f"{i + 1}. {r.get('action', '')}（预计+{r.get('expected_score_gain', '')}分）"
-            for i, r in enumerate(roadmap)
-        )
-        strengths = result.get("competitive_analysis", {}).get("strengths", [])[:2]
-        strengths_text = "\n".join(f"✅ {s}" for s in strengths)
-
-        reply = (
-            f"📊 **ATS得分：{ats}/60 | HR得分：{hr}/40 | 总分：{total:.0f}/100**\n"
-            f"📈 面试概率：{prediction.get('interview_probability', '-')}\n\n"
-            f"{strengths_text}\n\n"
-            f"⚠️ **优先改进：**\n{improvements}\n\n"
-            f"---\n要继续优化，还是直接导出？"
-        )
-        return {
-            "messages": [AIMessage(content=reply)],
-            "eval_result": result,
-        }
-    except Exception as e:
-        logger.error(f"evaluator error: {e}")
-        sys_msg = SystemMessage(content=_get_stage_system("EVALUATING", state))
-        response = await llm.ainvoke([sys_msg] + messages)
-        return {"messages": [response]}
+    checks = review_resume(resume_data, state.get("jd_info") or None)
+    reply = (
+        "🔎 **投递前核对**\n\n"
+        + "\n".join(f"{i + 1}. {item}" for i, item in enumerate(checks))
+        + "\n\n这些是基于当前内容的检查，不代表真实 ATS 分数或面试概率。"
+        + "\n\n要继续补充，还是导出当前版本？"
+    )
+    return {
+        "messages": [AIMessage(content=reply)],
+        "resume_draft": resume_to_text(resume_data),
+        "eval_result": {"checks": checks},
+    }
 
 
 async def export_node(state: ResumeState, llm: ChatOpenAI) -> dict:
@@ -938,7 +1004,7 @@ def route_by_stage(state: ResumeState) -> str:
 # ── 图构建 ────────────────────────────────────────────────────────────────────
 
 
-def build_graph(llm: ChatOpenAI) -> Any:
+def build_graph(llm: ChatOpenAI, checkpointer: Any | None = None) -> Any:
     """构建并编译 LangGraph 状态机"""
     from functools import partial
 
@@ -978,19 +1044,26 @@ def build_graph(llm: ChatOpenAI) -> Any:
     for node in ["jd_input", "building", "evaluating", "export"]:
         graph.add_edge(node, END)
 
-    checkpointer = MemorySaver()
-    return graph.compile(checkpointer=checkpointer)
+    return graph.compile(checkpointer=checkpointer or MemorySaver())
 
 
 # ── 对外接口 ──────────────────────────────────────────────────────────────────
 
 _graph_cache: dict[str, Any] = {}
+_persistent_checkpointer: Any | None = None
+
+
+def configure_checkpointer(checkpointer: Any | None) -> None:
+    """Share the durable checkpoint store across all graph instances."""
+    global _persistent_checkpointer
+    _persistent_checkpointer = checkpointer
+    _graph_cache.clear()
 
 
 def get_graph(llm: ChatOpenAI) -> Any:
     key = f"{llm.model_name}"
     if key not in _graph_cache:
-        _graph_cache[key] = build_graph(llm)
+        _graph_cache[key] = build_graph(llm, _persistent_checkpointer)
     return _graph_cache[key]
 
 
@@ -1037,5 +1110,20 @@ async def stream_agent(messages: list[dict], session_id: str, llm: ChatOpenAI):
             elif last_content and last_content not in full_response:
                 # 节点格式化回复与流式内容不同，追加输出
                 yield "\n\n---\n" + last_content
+        if state and state.values:
+            from app.services.session_store import (
+                resume_data_has_content,
+                save_resume_session,
+            )
+
+            resume_data = state.values.get("resume_data") or {}
+            if not resume_data_has_content(resume_data):
+                resume_data = _serialize_to_resume_data(state.values)
+            save_resume_session(
+                session_id=session_id,
+                resume_data=resume_data,
+                resume_draft=state.values.get("resume_draft", ""),
+                stage=state.values.get("stage", ""),
+            )
     except Exception as e:
         logger.error(f"fallback state read error: {e}")

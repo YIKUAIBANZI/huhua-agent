@@ -14,8 +14,14 @@
             align-items: center; }
   #header a { color: #fff; opacity: .8; text-decoration: none; font-size: 13px; font-weight: 400; }
   #header a:hover { opacity: 1; }
-  main { flex: 1; display: grid; grid-template-columns: 240px 1fr 380px; gap: 12px;
+  #header-actions { display: flex; align-items: center; gap: 14px; }
+  #btn-toggle-data { color: #fff; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3);
+                     border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 12px; }
+  main { flex: 1; display: grid; grid-template-columns: 240px 1fr; gap: 12px;
          padding: 12px; overflow: hidden; }
+  main.show-data { grid-template-columns: 240px 1fr 380px; }
+  #data-panel { display: none; }
+  main.show-data #data-panel { display: flex; }
   .panel { background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.06);
            display: flex; flex-direction: column; overflow: hidden; }
   .panel-header { padding: 10px 14px; border-bottom: 1px solid #eee;
@@ -47,10 +53,13 @@
 
 <div id="header">
   <span>胡话简历 · 模板预览</span>
-  <a href="/">← 回到聊天</a>
+  <div id="header-actions">
+    <button id="btn-toggle-data">高级编辑</button>
+    <a href="/">← 回到聊天</a>
+  </div>
 </div>
 
-<main>
+<main id="resume-main">
   <div class="panel">
     <div class="panel-header">模板 <span class="muted" id="tpl-count"></span></div>
     <div id="template-list"></div>
@@ -70,9 +79,10 @@
     <iframe id="preview-frame"></iframe>
   </div>
 
-  <div class="panel">
+  <div class="panel" id="data-panel">
     <div class="panel-header">
       数据（JSON）
+      <span class="muted" id="data-source"></span>
       <label id="btn-upload-photo" style="cursor:pointer;padding:4px 10px;border:1px solid #e0e0e0;border-radius:4px;font-size:12px;margin-left:auto;">
         📷 头像
         <input id="photo-input" type="file" accept="image/jpeg,image/png" style="display:none;">
@@ -92,6 +102,14 @@ const currentTplEl = document.getElementById('current-tpl');
 const frameEl = document.getElementById('preview-frame');
 const editorEl = document.getElementById('json-editor');
 const renderBtn = document.getElementById('btn-render');
+const dataSourceEl = document.getElementById('data-source');
+const resumeMainEl = document.getElementById('resume-main');
+const toggleDataBtn = document.getElementById('btn-toggle-data');
+
+toggleDataBtn.addEventListener('click', () => {
+  const shown = resumeMainEl.classList.toggle('show-data');
+  toggleDataBtn.textContent = shown ? '收起编辑' : '高级编辑';
+});
 
 async function init() {
   // 优先用 URL 参数 ?session=xxx 指定的 session，否则看 localStorage（聊天页会写入）
@@ -125,6 +143,9 @@ async function init() {
   // 如果展示的是 sample，给编辑器一个软提示
   if (dataSource === 'sample' && sessionId) {
     console.info('[resume] session 还没产出数据，展示 sample。session_id=', sessionId);
+  }
+  if (dataSourceEl) {
+    dataSourceEl.textContent = dataSource === 'session' ? '当前会话' : '样例数据';
   }
 
   tplCountEl.textContent = `(${state.templates.length})`;

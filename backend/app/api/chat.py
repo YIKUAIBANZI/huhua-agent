@@ -7,7 +7,7 @@ from fastapi.responses import FileResponse, Response, StreamingResponse
 from langchain_core.messages import AIMessage
 from langchain_openai import ChatOpenAI
 
-from app.agents.resume_graph import get_graph, stream_agent
+from app.agents.resume_graph import _serialize_to_resume_data, get_graph, stream_agent
 from app.config import get_settings
 from app.schemas.chat import ChatRequest
 from app.services.file_extractor import (
@@ -15,15 +15,50 @@ from app.services.file_extractor import (
     UnsupportedFileError,
     extract_text,
 )
+from app.services.session_store import (
+    delete_resume_session,
+    load_resume_session,
+    resume_data_has_content,
+)
 from app.tools.docx_exporter import resume_to_docx
 from app.tools.docx_template_filler import TEMPLATE_DIR, list_templates
+from app.tools.resume_data_docx import resume_data_to_docx
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+async def _session_meta(session_id: str, llm: ChatOpenAI) -> dict:
+    """Turn-end snapshot for the live resume canvas."""
+    stage = ""
+    has_data = False
+    try:
+        graph = get_graph(llm)
+        state = await graph.aget_state({"configurable": {"thread_id": session_id}})
+        vals = (state.values if state else {}) or {}
+        stage = vals.get("stage") or "JD_INPUT"
+        rd = vals.get("resume_data") or {}
+        if not resume_data_has_content(rd) and vals:
+            rd = _serialize_to_resume_data(vals)
+        has_data = resume_data_has_content(rd)
+    except Exception as e:
+        logger.warning("session meta graph read failed: %s", e)
+        stored = load_resume_session(session_id)
+        if stored:
+            stage = stored.get("stage") or ""
+            has_data = bool(stored.get("has_data"))
+    return {
+        "type": "meta",
+        "session_id": session_id,
+        "stage": stage,
+        "has_data": has_data,
+    }
+
+
 def _get_llm() -> ChatOpenAI:
     s = get_settings()
+    if not s.LLM_API_KEY:
+        raise HTTPException(status_code=503, detail="服务尚未配置模型，请稍后再试")
     return ChatOpenAI(
         model=s.LLM_MODEL,
         api_key=s.LLM_API_KEY,
@@ -43,9 +78,10 @@ async def chat_stream(req: ChatRequest):
         try:
             async for token in stream_agent(messages, session_id, llm):
                 yield f"data: {json.dumps({'content': token}, ensure_ascii=False)}\n\n"
+            yield f"data: {json.dumps(await _session_meta(session_id, llm), ensure_ascii=False)}\n\n"
         except Exception as e:
-            logger.error(f"stream error: {e}")
-            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+            logger.error("stream error", exc_info=True)
+            yield f"data: {json.dumps({'error': '生成失败，请稍后重试'})}\n\n"
         yield "data: [DONE]\n\n"
 
     return StreamingResponse(
@@ -53,6 +89,23 @@ async def chat_stream(req: ChatRequest):
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+
+@router.delete("/session/{session_id}")
+async def delete_session(session_id: str):
+    """Delete persisted resume data and the conversation checkpoint."""
+    delete_resume_session(session_id)
+    try:
+        graph = get_graph(_get_llm())
+        checkpointer = getattr(graph, "checkpointer", None)
+        if checkpointer and hasattr(checkpointer, "adelete_thread"):
+            await checkpointer.adelete_thread(session_id)
+    except HTTPException:
+        # Persisted personal data is still deleted when the model is not configured.
+        pass
+    except Exception:
+        logger.warning("checkpoint deletion failed", exc_info=True)
+    return {"deleted": True}
 
 
 @router.post("/upload")
@@ -116,16 +169,31 @@ async def export_docx(session_id: str = Query(...)):
     try:
         state = await graph.aget_state(config)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"读取会话失败: {e}")
+        logger.warning(f"graph state read failed, trying persisted session: {e}")
+        state = None
 
-    if not state:
-        raise HTTPException(status_code=404, detail="会话不存在")
+    resume_draft = ""
+    if state and state.values:
+        resume_draft = state.values.get("resume_draft", "")
+        if not resume_draft:
+            msgs = state.values.get("messages", [])
+            ai_msgs = [m for m in msgs if isinstance(m, AIMessage)]
+            resume_draft = ai_msgs[-1].content if ai_msgs else ""
 
-    resume_draft = state.values.get("resume_draft", "")
-    if not resume_draft:
-        msgs = state.values.get("messages", [])
-        ai_msgs = [m for m in msgs if isinstance(m, AIMessage)]
-        resume_draft = ai_msgs[-1].content if ai_msgs else ""
+    stored = load_resume_session(session_id)
+    if not resume_draft and stored and stored.get("has_data"):
+        try:
+            docx_bytes = resume_data_to_docx(stored["resume_data"])
+        except Exception as e:
+            logger.error(f"persisted docx gen error: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail=f"生成 DOCX 失败: {e}")
+        return Response(
+            content=docx_bytes,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={
+                "Content-Disposition": f'attachment; filename="resume_{session_id[:8]}.docx"'
+            },
+        )
 
     if not resume_draft:
         raise HTTPException(status_code=404, detail="简历草稿不存在，请先完成生成步骤")

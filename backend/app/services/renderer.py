@@ -10,7 +10,7 @@ TEMPLATE_DIR = ROOT / "data" / "jianlimoban" / "html-template"
 
 # 当前上线的 6 款模板。其余模板文件仍在 templates/ 目录下但不对外暴露，便于随时恢复。
 TEMPLATES = [
-    {"id": "t001-jianyue", "name": "简约单栏", "style": "极简 / ATS 友好"},
+    {"id": "t001-jianyue", "name": "简约单栏", "style": "极简 / 标准单栏"},
     {"id": "t002-jianyue", "name": "深蓝横幅", "style": "商务单栏"},
     {"id": "t004-jianyue", "name": "灰条夹页", "style": "单栏 / 顶底装饰"},
     {"id": "t1000", "name": "浅蓝斜切", "style": "单栏 / 色块标题"},

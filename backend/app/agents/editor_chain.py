@@ -11,6 +11,7 @@
 
 import asyncio
 import logging
+import re
 from typing import Any
 
 from langchain_core.messages import HumanMessage
@@ -20,6 +21,10 @@ from pydantic import BaseModel, Field
 logger = logging.getLogger(__name__)
 
 EDITOR_TIMEOUT_SECONDS = 15.0
+
+
+def _numbers(text: str) -> set[str]:
+    return set(re.findall(r"\d+(?:[.,]\d+)?%?", text or ""))
 
 
 class _ProjectPolish(BaseModel):
@@ -138,8 +143,16 @@ async def run_editor(resume_data: dict, llm: ChatOpenAI) -> dict:
         for p in merged["projects"]:
             p_copy = dict(p)
             bullets = name_to_bullets.get(p.get("name", ""), [])
-            if bullets:
+            original_numbers = _numbers(p.get("description", ""))
+            introduced_numbers = _numbers("\n".join(bullets)) - original_numbers
+            if bullets and not introduced_numbers:
                 p_copy["polished_bullets"] = bullets
+            elif introduced_numbers:
+                logger.warning(
+                    "[editor/fact-check] rejected new numbers project=%r numbers=%s",
+                    p.get("name", ""),
+                    sorted(introduced_numbers),
+                )
             new_projects.append(p_copy)
         merged["projects"] = new_projects
 

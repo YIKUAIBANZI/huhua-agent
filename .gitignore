@@ -26,6 +26,10 @@ data/output/
 data/scan_output/
 data/template_previews/
 data/banz_resume.json
+data/huhua.db
+data/checkpoints.sqlite3
+backend/data/*.sqlite3
+backend/data/*.db
 
 # Tooling
 .playwright-cli/

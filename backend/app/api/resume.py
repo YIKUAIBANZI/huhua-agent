@@ -13,6 +13,7 @@ from app.agents.resume_graph import _serialize_to_resume_data, get_graph
 from app.config import get_settings
 from app.schemas.editor import ResumeData
 from app.services.renderer import list_templates, render_resume
+from app.services.session_store import load_resume_session, resume_data_has_content
 from app.tools.resume_data_docx import resume_data_to_docx
 
 router = APIRouter()
@@ -47,31 +48,44 @@ async def sample():
 
 @router.get("/current")
 async def current_resume(session_id: str = Query(..., description="聊天 session_id")):
-    """读聊天 session 当前产出的 ResumeData。没有产出就返回 has_data=false，前端 fallback 到 /sample。"""
-    graph = get_graph(_llm_for_graph())
+    """读聊天 session 当前产出的 ResumeData，内存没有时回退到 SQLite 持久化数据。"""
     config = {"configurable": {"thread_id": session_id}}
-    try:
-        state = await graph.aget_state(config)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"读取 session 失败: {e}")
-    if not state or not state.values:
-        return {"has_data": False, "data": None}
-    vals = state.values
-    # 优先用 BUILDING 阶段序列化好的 resume_data；否则实时 serialize 一次
-    rd = vals.get("resume_data") or {}
-    if not rd:
-        rd = _serialize_to_resume_data(vals)
-    basic = rd.get("basic_info") or {}
-    has_any = bool(
-        rd.get("work_experience")
-        or rd.get("projects")
-        or rd.get("education")
-        or basic.get("name")
-        or basic.get("height")
-        or basic.get("age")
-        or rd.get("self_evaluation")
-    )
-    return {"has_data": has_any, "data": rd if has_any else None}
+    rd: dict = {}
+    stage = ""
+    stored = load_resume_session(session_id)
+    if get_settings().LLM_API_KEY:
+        try:
+            graph = get_graph(_llm_for_graph())
+            state = await graph.aget_state(config)
+        except Exception as e:
+            state = None
+            graph_error = e
+        else:
+            graph_error = None
+    else:
+        state = None
+        graph_error = None
+
+    if state and state.values:
+        vals = state.values
+        stage = vals.get("stage") or "JD_INPUT"
+        # 优先用 BUILDING 阶段序列化好的 resume_data；否则实时 serialize 一次
+        rd = vals.get("resume_data") or {}
+        if not resume_data_has_content(rd):
+            rd = _serialize_to_resume_data(vals)
+
+    if not resume_data_has_content(rd) and stored:
+        rd = stored["resume_data"]
+    if not stage and stored:
+        stage = stored.get("stage") or ""
+
+    if not resume_data_has_content(rd):
+        if graph_error and not stored:
+            raise HTTPException(
+                status_code=500, detail=f"读取 session 失败: {graph_error}"
+            )
+        return {"has_data": False, "data": None, "stage": stage}
+    return {"has_data": True, "data": rd, "stage": stage}
 
 
 @router.post("/render/{template_id}", response_class=HTMLResponse)
@@ -85,7 +99,7 @@ async def render(template_id: str, data: ResumeData):
 
 @router.post("/export/docx/{template_id}")
 async def export_docx(template_id: str, data: ResumeData):
-    """把 ResumeData 导出为 Word 文件。template_id 目前只影响文件名（docx 不走 Jinja 模板）。"""
+    """把 ResumeData 导出为通用 Word 文件。template_id 仅用于文件名。"""
     payload = data.model_dump()
     docx_bytes = resume_data_to_docx(payload)
     name = (payload.get("basic_info") or {}).get("name") or "简历"

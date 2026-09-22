@@ -3,13 +3,25 @@ from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from app.config import get_settings
 
 
+def _sqlalchemy_url(url: str) -> str:
+    if url.startswith("postgres://"):
+        return "postgresql+psycopg://" + url.removeprefix("postgres://")
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url.removeprefix("postgresql://")
+    return url
+
+
 class Base(DeclarativeBase):
     pass
 
 
 engine = create_engine(
-    get_settings().DATABASE_URL,
-    connect_args={"check_same_thread": False},  # SQLite 需要
+    _sqlalchemy_url(get_settings().DATABASE_URL),
+    connect_args=(
+        {"check_same_thread": False}
+        if get_settings().DATABASE_URL.startswith("sqlite")
+        else {}
+    ),
 )
 
 SessionLocal = sessionmaker(bind=engine)

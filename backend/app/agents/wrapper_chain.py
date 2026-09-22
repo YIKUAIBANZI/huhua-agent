@@ -55,6 +55,10 @@ def evaluate(state: WrapperState) -> dict:
 async def retrieve(state: WrapperState) -> dict:
     """混合检索参考样本"""
     import asyncio
+    from app.config import get_settings
+
+    if not get_settings().ENABLE_RAG:
+        return {"context": "", "references": []}
 
     def _retrieve():
         from app.rag.vector_store import get_retriever
