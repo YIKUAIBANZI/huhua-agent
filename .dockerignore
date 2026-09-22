@@ -1,0 +1,13 @@
+.git
+.claude
+.venv
+.playwright-cli
+**/.DS_Store
+**/__pycache__
+data/chroma_db
+data/output
+data/_backup_*
+data/notes
+data/template_previews
+backend/data/*.db
+backend/data/*.sqlite3

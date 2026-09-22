@@ -67,14 +67,14 @@ async def run_evaluator_chain(
     try:
         structured_llm = llm.with_structured_output(EvaluateResponse)
         chain = EVALUATOR_PROMPT | structured_llm
-        result = chain.invoke(prompt_vars)
+        result = await chain.ainvoke(prompt_vars)
         return result.model_dump()
     except Exception as e:
         logger.info(f"结构化输出不可用，回退手工解析: {e}")
 
     # 回退：手工解析
     chain = EVALUATOR_PROMPT | llm
-    output = chain.invoke(prompt_vars)
+    output = await chain.ainvoke(prompt_vars)
     return _parse_output(output.content)
 
 

@@ -14,8 +14,14 @@
             align-items: center; }
   #header a { color: #fff; opacity: .8; text-decoration: none; font-size: 13px; font-weight: 400; }
   #header a:hover { opacity: 1; }
-  main { flex: 1; display: grid; grid-template-columns: 240px 1fr 380px; gap: 12px;
+  #header-actions { display: flex; align-items: center; gap: 14px; }
+  #btn-toggle-data { color: #fff; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3);
+                     border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 12px; }
+  main { flex: 1; display: grid; grid-template-columns: 240px 1fr; gap: 12px;
          padding: 12px; overflow: hidden; }
+  main.show-data { grid-template-columns: 240px 1fr 380px; }
+  #data-panel { display: none; }
+  main.show-data #data-panel { display: flex; }
   .panel { background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.06);
            display: flex; flex-direction: column; overflow: hidden; }
   .panel-header { padding: 10px 14px; border-bottom: 1px solid #eee;
@@ -33,7 +39,9 @@
   .tpl-name { font-size: 13px; font-weight: 600; }
   .tpl-style { font-size: 11px; color: #888; margin-top: 2px; }
 
-  #preview-frame { flex: 1; border: none; background: #fafafa; }
+  #preview-scroll { flex: 1; min-height: 0; overflow: auto; background: #fafafa; }
+  #preview-page { position: relative; width: 100%; height: 100%; }
+  #preview-frame { display: block; width: 100%; height: 100%; border: none; background: #fafafa; }
 
   #json-editor { flex: 1; padding: 10px 14px; font-family: 'SF Mono', Menlo, monospace;
                  font-size: 12px; border: none; outline: none; resize: none;
@@ -41,16 +49,30 @@
 
   .err { color: #d33; padding: 12px; font-size: 12px; }
   .muted { color: #888; font-size: 11px; font-weight: 400; }
+  @media (max-width: 700px) {
+    body { height: 100dvh; }
+    #header { padding: 10px 14px; font-size: 14px; }
+    #header-actions { gap: 8px; }
+    main, main.show-data { display: flex; flex-direction: column; overflow-y: auto; padding: 8px; gap: 8px; }
+    main > .panel:first-child { flex: 0 0 auto; height: 128px; }
+    #template-list { display: flex; gap: 6px; overflow-x: auto; overflow-y: hidden; }
+    .tpl-item { flex: 0 0 126px; margin-bottom: 0; }
+    main > .panel:nth-child(2) { flex: 0 0 auto; height: calc(100dvh - 200px); min-height: 390px; }
+    #data-panel { flex: 0 0 auto; height: 320px; }
+  }
 </style>
 </head>
 <body>
 
 <div id="header">
   <span>胡话简历 · 模板预览</span>
-  <a href="/">← 回到聊天</a>
+  <div id="header-actions">
+    <button id="btn-toggle-data">高级编辑</button>
+    <a href="/">← 回到聊天</a>
+  </div>
 </div>
 
-<main>
+<main id="resume-main">
   <div class="panel">
     <div class="panel-header">模板 <span class="muted" id="tpl-count"></span></div>
     <div id="template-list"></div>
@@ -63,16 +85,18 @@
         <button id="btn-export">导出 ▾</button>
         <div id="export-menu" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:#fff;border:1px solid #e0e0e0;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:120px;z-index:10;">
           <div class="export-opt" data-format="pdf" style="padding:8px 14px;cursor:pointer;font-size:13px;">导出 PDF</div>
-          <div class="export-opt" data-format="docx" style="padding:8px 14px;cursor:pointer;font-size:13px;border-top:1px solid #f0f0f0;">导出 Word (DOCX)</div>
+          <div class="export-opt" data-format="docx" style="padding:8px 14px;cursor:pointer;font-size:13px;border-top:1px solid #f0f0f0;">通用 Word (DOCX)</div>
+          <div class="muted" style="padding:8px 14px;max-width:190px;line-height:1.4;">所选模板样式用于 PDF；Word 使用统一排版。</div>
         </div>
       </span>
     </div>
-    <iframe id="preview-frame"></iframe>
+    <div id="preview-scroll"><div id="preview-page"><iframe id="preview-frame" sandbox=""></iframe></div></div>
   </div>
 
-  <div class="panel">
+  <div class="panel" id="data-panel">
     <div class="panel-header">
       数据（JSON）
+      <span class="muted" id="data-source"></span>
       <label id="btn-upload-photo" style="cursor:pointer;padding:4px 10px;border:1px solid #e0e0e0;border-radius:4px;font-size:12px;margin-left:auto;">
         📷 头像
         <input id="photo-input" type="file" accept="image/jpeg,image/png" style="display:none;">
@@ -90,8 +114,44 @@ const tplListEl = document.getElementById('template-list');
 const tplCountEl = document.getElementById('tpl-count');
 const currentTplEl = document.getElementById('current-tpl');
 const frameEl = document.getElementById('preview-frame');
+const previewPageEl = document.getElementById('preview-page');
+const previewScrollEl = document.getElementById('preview-scroll');
 const editorEl = document.getElementById('json-editor');
 const renderBtn = document.getElementById('btn-render');
+const dataSourceEl = document.getElementById('data-source');
+const resumeMainEl = document.getElementById('resume-main');
+const toggleDataBtn = document.getElementById('btn-toggle-data');
+
+toggleDataBtn.addEventListener('click', () => {
+  const shown = resumeMainEl.classList.toggle('show-data');
+  toggleDataBtn.textContent = shown ? '收起编辑' : '高级编辑';
+});
+
+function scalePreview() {
+  if (window.innerWidth > 700) {
+    previewPageEl.style.width = '100%';
+    previewPageEl.style.height = '100%';
+    frameEl.style.width = '100%';
+    frameEl.style.height = '100%';
+    frameEl.style.transform = '';
+    frameEl.style.transformOrigin = '';
+    frameEl.style.position = '';
+    frameEl.style.left = '';
+    frameEl.style.top = '';
+    return;
+  }
+  const scale = Math.max(0.35, Math.min(1, (previewScrollEl.clientWidth - 12) / 794));
+  previewPageEl.style.width = `${794 * scale}px`;
+  previewPageEl.style.height = `${1123 * scale}px`;
+  frameEl.style.width = '794px';
+  frameEl.style.height = '1123px';
+  frameEl.style.transformOrigin = 'top left';
+  frameEl.style.transform = `scale(${scale})`;
+  frameEl.style.position = 'absolute';
+  frameEl.style.left = '0';
+  frameEl.style.top = '0';
+}
+window.addEventListener('resize', scalePreview);
 
 async function init() {
   // 优先用 URL 参数 ?session=xxx 指定的 session，否则看 localStorage（聊天页会写入）
@@ -126,6 +186,9 @@ async function init() {
   if (dataSource === 'sample' && sessionId) {
     console.info('[resume] session 还没产出数据，展示 sample。session_id=', sessionId);
   }
+  if (dataSourceEl) {
+    dataSourceEl.textContent = dataSource === 'session' ? '当前会话' : '样例数据';
+  }
 
   tplCountEl.textContent = `(${state.templates.length})`;
   tplListEl.innerHTML = '';
@@ -139,6 +202,7 @@ async function init() {
   });
 
   selectTemplate(state.templates[0].id);
+  requestAnimationFrame(scalePreview);
 }
 
 async function selectTemplate(id) {
@@ -156,7 +220,7 @@ async function renderPreview() {
   try {
     data = JSON.parse(editorEl.value);
   } catch (e) {
-    frameEl.srcdoc = `<p class="err">JSON 解析失败：${e.message}</p>`;
+    frameEl.srcdoc = '<p class="err">JSON 格式有误，请检查后重试。</p>';
     return;
   }
   try {
@@ -166,14 +230,14 @@ async function renderPreview() {
       body: JSON.stringify(data),
     });
     if (!res.ok) {
-      const detail = await res.text();
-      frameEl.srcdoc = `<p style="color:#d33;padding:12px;">渲染失败 (${res.status}): ${detail}</p>`;
+      frameEl.srcdoc = `<p style="color:#d33;padding:12px;">渲染失败 (${res.status})，请检查简历数据。</p>`;
       return;
     }
     const html = await res.text();
     frameEl.srcdoc = html;
+    requestAnimationFrame(scalePreview);
   } catch (e) {
-    frameEl.srcdoc = `<p style="color:#d33;padding:12px;">网络错误: ${e.message}</p>`;
+    frameEl.srcdoc = '<p style="color:#d33;padding:12px;">网络错误，请稍后重试。</p>';
   }
 }
 
@@ -230,23 +294,29 @@ document.querySelectorAll('.export-opt').forEach(el => {
 
     if (fmt === 'pdf') {
       // 渲染到新窗口 + 自动调起打印对话框（用户另存为 PDF）
-      const res = await fetch(`/api/resume/render/${state.current}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) { alert('渲染失败：' + await res.text()); return; }
-      const html = await res.text();
       const w = window.open('', '_blank');
       if (!w) { alert('浏览器拦截了新窗口，请允许弹窗'); return; }
-      // 注入自动打印脚本
-      const injected = html.replace(
-        '</body>',
-        '<script>window.addEventListener("load", () => setTimeout(() => window.print(), 300));<\/script></body>'
-      );
-      w.document.open();
-      w.document.write(injected);
-      w.document.close();
+      w.opener = null;
+      try {
+        const res = await fetch(`/api/resume/render/${state.current}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error(`渲染失败 (${res.status})`);
+        const html = await res.text();
+        // 注入自动打印脚本
+        const injected = html.replace(
+          '</body>',
+          '<script>window.addEventListener("load", () => setTimeout(() => window.print(), 300));<\/script></body>'
+        );
+        w.document.open();
+        w.document.write(injected);
+        w.document.close();
+      } catch (error) {
+        w.close();
+        alert(`PDF 导出失败：${error.message}`);
+      }
     } else if (fmt === 'docx') {
       const res = await fetch(`/api/resume/export/docx/${state.current}`, {
         method: 'POST',

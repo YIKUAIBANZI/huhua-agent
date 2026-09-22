@@ -32,6 +32,10 @@ async def run_decoder_chain(
     import asyncio
 
     context = ""
+    from app.config import get_settings
+
+    if not get_settings().ENABLE_RAG:
+        return await _run_without_rag(jd_text, llm)
     try:
 
         def _retrieve():
@@ -76,6 +80,20 @@ async def run_decoder_chain(
         "summary": summary,
         "jd_info": jd_info,
     }
+
+
+async def _run_without_rag(jd_text: str, llm: ChatOpenAI | None) -> dict:
+    if llm is None:
+        return {
+            "decoded_items": [],
+            "summary": f"[待接入 LLM] JD 长度：{len(jd_text)} 字",
+            "jd_info": _empty_jd_info(),
+        }
+    chain = JD_DECODER_PROMPT | llm
+    output = await chain.ainvoke({"context": "", "jd_text": jd_text})
+    jd_info, decode_text = _split_output(output.content)
+    decoded_items, summary = _parse_decode_text(decode_text)
+    return {"decoded_items": decoded_items, "summary": summary, "jd_info": jd_info}
 
 
 def _split_output(content: str) -> tuple[dict, str]:

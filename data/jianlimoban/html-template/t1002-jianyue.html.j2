@@ -105,7 +105,7 @@
       {% if basic_info.location %}<div class="info-item"><span class="label">住　址</span>{{ basic_info.location }}</div>{% endif %}
       {% if education and education[0].degree %}<div class="info-item"><span class="label">学　历</span>{{ education[0].degree }}</div>{% endif %}
     </div>
-    {% if basic_info.photo %}<div class="photo" style="background:none;"><img src="{{ basic_info.photo|safe }}" style="position:relative;z-index:2;width:100%;height:100%;object-fit:cover;border-radius:4px;"></div>{% else %}<div class="photo"><div class="badge">点击更改/替换</div></div>{% endif %}
+    {% if basic_info.photo %}<div class="photo" style="background:none;"><img src="{{ basic_info.photo }}" style="position:relative;z-index:2;width:100%;height:100%;object-fit:cover;border-radius:4px;"></div>{% else %}<div class="photo"><div class="badge">点击更改/替换</div></div>{% endif %}
   </div>
 
   {% if education %}

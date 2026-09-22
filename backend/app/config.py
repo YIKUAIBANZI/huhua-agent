@@ -1,10 +1,17 @@
 from pydantic_settings import BaseSettings
 from functools import lru_cache
+from pathlib import Path
+
+
+BACKEND_DIR = Path(__file__).resolve().parents[1]
+PROJECT_DIR = BACKEND_DIR.parent
 
 
 class Settings(BaseSettings):
     # 数据库
-    DATABASE_URL: str = "sqlite:///./data/huhua.db"
+    DATABASE_URL: str = f"sqlite:///{BACKEND_DIR / 'data' / 'huhua.db'}"
+    CHECKPOINT_DB_PATH: str = str(BACKEND_DIR / "data" / "checkpoints.sqlite3")
+    SESSION_RETENTION_DAYS: int = 7
 
     # LLM
     LLM_PROVIDER: str = "openai"  # openai / deepseek
@@ -17,9 +24,14 @@ class Settings(BaseSettings):
     LLM_BASE_URL: str | None = None  # DeepSeek 等自定义 base_url
     LLM_TEMPERATURE: float = 0.7
 
+    # 用户主动点击岗位匹配时才调用 Jev；凭证仅由服务端环境变量读取。
+    JEV_API_KEY: str = ""
+    JEV_TIMEOUT_SECONDS: float = 8.0
+
     # RAG
-    CHROMA_DIR: str = "./data/chroma_db"
+    CHROMA_DIR: str = str(PROJECT_DIR / "data" / "chroma_db")
     RAG_TOP_K: int = 5
+    ENABLE_RAG: bool = False
 
     model_config = {
         "env_file": ".env",
