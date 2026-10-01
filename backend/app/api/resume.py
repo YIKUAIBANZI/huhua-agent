@@ -180,9 +180,9 @@ async def match_resume(req: MatchRequest):
 
 
 @router.post("/render/{template_id}", response_class=HTMLResponse)
-async def render(template_id: str, data: ResumeData):
+async def render(template_id: str, data: ResumeData, interactive: bool = Query(False)):
     try:
-        html = render_resume(template_id, data.model_dump())
+        html = render_resume(template_id, data.model_dump(), interactive=interactive)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     return HTMLResponse(content=html)

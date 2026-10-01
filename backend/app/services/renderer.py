@@ -23,6 +23,7 @@ _env = Environment(
     loader=FileSystemLoader(str(TEMPLATE_DIR)),
     autoescape=select_autoescape(["html", "htm", "j2"]),
 )
+_env.filters["pointer_escape"] = lambda value: str(value).replace("~", "~0").replace("/", "~1")
 
 _PHOTO_DATA_URL = re.compile(r"\Adata:image/(?:jpeg|png);base64,[A-Za-z0-9+/]+={0,2}\Z")
 _MAX_PHOTO_URL_LENGTH = 7 * 1024 * 1024
@@ -32,7 +33,7 @@ def list_templates() -> list[dict[str, str]]:
     return TEMPLATES
 
 
-def render_resume(template_id: str, data: dict[str, Any]) -> str:
+def render_resume(template_id: str, data: dict[str, Any], interactive: bool = False) -> str:
     filename = f"{template_id}.html.j2"
     try:
         template = _env.get_template(filename)
@@ -43,4 +44,8 @@ def render_resume(template_id: str, data: dict[str, Any]) -> str:
     photo = basic.get("photo")
     if not isinstance(photo, str) or len(photo) > _MAX_PHOTO_URL_LENGTH or not _PHOTO_DATA_URL.fullmatch(photo):
         basic["photo"] = ""
-    return template.render(**{**data, "basic_info": basic})
+    html = template.render(**{**data, "basic_info": basic})
+    if interactive:
+        # Only our static bridge is executable; resume values still use Jinja autoescape.
+        html = html.replace("</body>", '<script src="/static/resume-preview.js"></script>\n</body>')
+    return html

@@ -15,6 +15,7 @@ AI 简历对话工作台：聊天收集真实经历 → 针对岗位整理 → �
 - **投递检查**：指出 JD 证据缺口、待核实数字和导出风险，不虚构面试概率
 - **可选 Jev 参考分**：用户主动点击后，根据已识别的 JD 要求与简历能力证据给出参考覆盖分；未配置 `JEV_API_KEY` 时不显示入口
 - **6 款模板**：简约单栏 / 深蓝横幅 / 灰条夹页 / 浅蓝斜切 / 浅蓝色块 / 淡青平行
+- **实时表单编辑**：右侧按栏目填写，输入立即更新 A4 预览；悬停文字显示虚线框并高亮对应输入框，点击可定位编辑。支持增删经历、要点与技能分组
 - **头像上传**：base64 内嵌，DOCX 导出也会带图
 - **导出**：所选模板由浏览器打印成 PDF；Word 使用统一排版，便于继续编辑
 
@@ -69,6 +70,17 @@ open http://127.0.0.1:8765/
 
 GitHub PR 会自动运行同一套测试。`JEV_API_KEY` 是可选配置；Jev 接口只发送从 JD 和简历抽出的能力标签，不发送姓名、联系方式、学校、公司或完整对话。参考分是当前简历的证据覆盖提示，不代表招聘系统评分或录用概率。
 
+模板编辑页位于 `/resume`，从当前聊天会话读取简历；没有会话简历时显示样例。此页的修改保留在当前页面，切换模板不会丢失，导出使用最新输入；刷新会重新读取会话数据，尚不回写聊天。
+
+本地服务启动后，可用已安装的 `playwright-cli` 运行交互回归（无需模型密钥）：
+
+```bash
+playwright-cli -s=huhua-editor open http://127.0.0.1:8765/resume
+playwright-cli -s=huhua-editor run-code --filename=tests/resume_editor.browser.js
+```
+
+该检查覆盖悬停与定位、连续输入和慢请求、增删后的字段对应、技能分组、六款模板、最新内容导出及手机布局。普通导出不包含编辑脚本或高亮样式。
+
 ## 公开 beta
 
 - `Dockerfile` 可直接运行服务，`render.yaml` 会创建 Web Service 和 Postgres。
@@ -94,7 +106,10 @@ backend/
 
 web/
   index.html          # 聊天页（Eloquent Canvas 紫色风）
-  resume.html         # 模板预览 + 头像上传 + 导出
+  resume.html         # 模板选择 + 实时表单编辑 + 导出
+  resume-editor.js    # 表单与渲染请求、字段联动
+  resume-editor.css   # 编辑工作台与移动端布局
+  resume-preview.js  # 隔离 iframe 中的字段映射与高亮
 
 data/
   jianlimoban/html-template/  # 6 款 Jinja2 模板
