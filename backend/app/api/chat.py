@@ -18,6 +18,13 @@ from app.services.file_extractor import (
     UnsupportedFileError,
     extract_text,
 )
+from app.services.image_ocr import (
+    IMAGE_EXT,
+    ImageFormatError,
+    ImageRecognitionError,
+    NoImageTextError,
+    recognize_jd_image,
+)
 from app.services.session_store import (
     delete_resume_session,
     ensure_resume_session,
@@ -40,6 +47,7 @@ MAX_CHAT_MESSAGES = 30
 MAX_CHAT_MESSAGE_CHARS = 10_000
 MAX_CHAT_TOTAL_CHARS = 60_000
 _extract_slots = asyncio.Semaphore(2)
+_image_slots = asyncio.Semaphore(2)
 
 
 async def _extract_with_timeout(filename: str, raw: bytes) -> str:
@@ -58,6 +66,17 @@ async def _extract_with_timeout(filename: str, raw: bytes) -> str:
     # occupied until it actually exits so requests cannot pile up CPU work.
     future.add_done_callback(lambda _: _extract_slots.release())
     return await asyncio.wait_for(asyncio.shield(future), timeout=20)
+
+
+async def _recognize_image_with_limit(filename: str, raw: bytes) -> str:
+    try:
+        await asyncio.wait_for(_image_slots.acquire(), timeout=1)
+    except TimeoutError:
+        raise HTTPException(status_code=503, detail="图片识别繁忙，请稍后重试")
+    try:
+        return await recognize_jd_image(filename, raw)
+    finally:
+        _image_slots.release()
 
 
 async def _session_meta(session_id: str, llm: ChatOpenAI) -> dict:
@@ -191,15 +210,15 @@ async def delete_session(session_id: str, request: Request):
 
 @router.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-    """接收前端上传的文件（PDF/DOCX/TXT/MD），返回提取后的文本内容。"""
+    """提取文档文字，或用视觉模型转写 JPG/PNG 岗位截图。"""
     from pathlib import Path as _Path
 
     filename = file.filename or "upload"
     ext = _Path(filename).suffix.lower()
-    if ext not in SUPPORTED_EXT:
+    if ext not in SUPPORTED_EXT | IMAGE_EXT:
         raise HTTPException(
             status_code=415,
-            detail=f"暂不支持此文件类型 {ext}，目前支持：PDF / DOCX / TXT / MD",
+            detail=f"暂不支持此文件类型 {ext}，目前支持：PDF / DOCX / TXT / MD / JPG / PNG",
         )
     chunks: list[bytes] = []
     size = 0
@@ -210,7 +229,17 @@ async def upload_file(file: UploadFile = File(...)):
                 raise HTTPException(status_code=413, detail="文件超过 10MB 上限")
             chunks.append(chunk)
         raw = b"".join(chunks)
-        text = await _extract_with_timeout(filename, raw)
+        text = (
+            await _recognize_image_with_limit(filename, raw)
+            if ext in IMAGE_EXT
+            else await _extract_with_timeout(filename, raw)
+        )
+    except ImageFormatError as e:
+        raise HTTPException(status_code=415, detail=str(e))
+    except NoImageTextError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except ImageRecognitionError as e:
+        raise HTTPException(status_code=503, detail=str(e))
     except UnsupportedFileError as e:
         raise HTTPException(status_code=415, detail=str(e))
     except FileLimitError as e:
@@ -230,6 +259,7 @@ async def upload_file(file: UploadFile = File(...)):
         "size": len(raw),
         "text": text,
         "text_length": len(text),
+        "source_type": "image" if ext in IMAGE_EXT else "document",
     }
 
 

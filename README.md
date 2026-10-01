@@ -9,6 +9,7 @@ AI 简历对话工作台：聊天收集真实经历 → 针对岗位整理 → �
 ## 能干嘛
 
 - **对话式收集**：不硬要 JD，随便聊"最近在忙什么"都能抽出项目素材
+- **截图解码**：上传 JPG/JPEG/PNG 岗位截图后由视觉模型转写文字；识别结果可以先核对、修改，再发送给 JD 解码流程
 - **自动包装**：把"我做了 TripAgent 跑 50 条 query"这种自然语言，用 STAR 法则重写成清晰 bullet，不补用户没说过的数字
 - **智能分组**：Java/Python → 技术栈；PRD/竞品 → 产品方法；Claude Code/ChatGPT → AI 工具——自动归类不用手动分
 - **投递检查**：指出 JD 证据缺口、待核实数字和导出风险，不虚构面试概率
@@ -35,7 +36,9 @@ AI 简历对话工作台：聊天收集真实经历 → 针对岗位整理 → �
 渲染：ResumeData → Jinja2 模板 → HTML（浏览器打印 PDF）/ python-docx（直出 DOCX）
 ```
 
-**双模型策略**：`LLM_MODEL` 用于主对话，`LLM_STRUCTURED_MODEL` 用于 Triage / editor 等结构化调用。默认配置使用 `qwen-plus`。
+**双模型策略**：`LLM_MODEL` 用于主对话，`LLM_STRUCTURED_MODEL` 用于 Triage / editor 等结构化调用。示例配置分别使用 `qwen3.6-plus` 和 `qwen-plus`。
+
+图片使用 `LLM_VISION_MODEL`。留空时按 API 地址选择：DeepSeek 使用 `deepseek-flash`，DashScope 使用 `qwen-vl-plus`，OpenAI 默认地址使用 `gpt-4o-mini`。图片会发送到配置的视觉模型服务；没有配置 `LLM_API_KEY` 时返回明确错误。图片上传仍受 10MB 限制，并有单独并发与请求频率限制。
 
 ---
 
@@ -56,6 +59,8 @@ cd backend
 open http://127.0.0.1:8765/
 ```
 
+如果使用 DeepSeek，在 `backend/.env` 中设置 `LLM_PROVIDER=deepseek`、`LLM_BASE_URL=https://api.deepseek.com`、`LLM_MODEL=deepseek-flash`、`LLM_STRUCTURED_MODEL=deepseek-flash`，并填写新生成的 `LLM_API_KEY`。`LLM_VISION_MODEL` 可留空，图片识别会自动使用 `deepseek-flash`。请勿把密钥提交到仓库或贴进聊天。
+
 运行回归检查：
 
 ```bash
@@ -69,7 +74,7 @@ GitHub PR 会自动运行同一套测试。`JEV_API_KEY` 是可选配置；Jev �
 - `Dockerfile` 可直接运行服务，`render.yaml` 会创建 Web Service 和 Postgres。
 - 在托管平台把 `LLM_API_KEY` 配成 Secret，不能提交到仓库。
 - 会话数据约保留 7 天；浏览器会在下次打开时清理超过 7 天的本地聊天记录。用户点击“新对话”会删除当前会话。
-- 当前限流是单进程内存计数；共用代理 IP 的用户可能共用额度。扩到多实例前需要平台或网关限流，不能直接相信客户端传来的 `X-Forwarded-For` 首项。
+- 当前聊天、匹配和上传限流是单进程内存计数；共用代理 IP 的用户可能共用额度。扩到多实例前需要平台或网关限流，不能直接相信客户端传来的 `X-Forwarded-For` 首项。
 - 服务端最多接受 10MB 文件，并对常见的超大上传提前拒绝；正式扩量前还需在网关限制分块上传的请求体大小。
 - Render 免费 Web 会休眠，免费 Postgres 目前也有期限，仅适合小规模 beta；正式开放前应升级存储或迁移数据库。
 
@@ -82,7 +87,7 @@ backend/
   app/
     agents/           # triage / wrapper / decoder / editor / resume_graph
     api/              # chat.py / resume.py
-    services/         # renderer.py（Jinja2）/ file_extractor.py（PDF/DOCX 解析）
+    services/         # renderer.py（Jinja2）/ file_extractor.py（PDF/DOCX 解析）/ image_ocr.py（截图转写）
     schemas/          # ResumeData / BasicInfo 等 pydantic
     tools/            # resume_data_docx.py（结构化 → Word）
   main.py

@@ -171,13 +171,13 @@
           <div class="flex flex-col gap-4">
             <div class="flex items-start px-4 gap-4">
               <span class="material-symbols-outlined text-outline mt-2">edit_note</span>
-              <textarea id="input" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-outline text-lg py-2 resize-none outline-none" placeholder="输入消息，Enter 发送 · 可粘贴或拖入 PDF/DOCX/TXT/MD"></textarea>
+              <textarea id="input" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-outline text-lg py-2 resize-none outline-none" placeholder="输入消息，Enter 发送 · 可粘贴或拖入 PDF/DOCX/JPG/PNG"></textarea>
             </div>
             <div class="flex items-center justify-between border-t border-outline-variant/10 pt-4 px-2">
               <div class="flex items-center gap-2">
-                <label class="p-2 hover:bg-surface-container rounded-full transition-colors text-on-surface-variant cursor-pointer" title="上传文件（PDF/DOCX/TXT/MD）">
+                <label class="p-2 hover:bg-surface-container rounded-full transition-colors text-on-surface-variant cursor-pointer" title="上传文件（PDF/DOCX/TXT/MD/JPG/PNG；图片由视觉模型识别）">
                   <span class="material-symbols-outlined text-lg">attach_file</span>
-                  <input id="file-input" type="file" class="hidden" accept=".pdf,.docx,.txt,.md,.markdown" multiple/>
+                  <input id="file-input" type="file" class="hidden" accept=".pdf,.docx,.txt,.md,.markdown,.jpg,.jpeg,.png" multiple/>
                 </label>
               </div>
               <button id="btn-send" class="bg-primary text-on-primary w-12 h-12 rounded-full flex items-center justify-center shadow-lg shadow-primary/30 hover:scale-105 active:scale-95 transition-all disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed" title="发送">
@@ -726,7 +726,7 @@ const dropOverlay = document.getElementById('drop-overlay');
 const commandBar = document.getElementById('command-bar');
 const commandSurface = document.getElementById('command-surface');
 
-const ALLOWED_EXT = /\.(pdf|docx|txt|md|markdown)$/i;
+const ALLOWED_EXT = /\.(pdf|docx|txt|md|markdown|jpg|jpeg|png)$/i;
 const MAX_SIZE = 10 * 1024 * 1024;
 
 function renderAttachments() {
@@ -758,6 +758,23 @@ function renderAttachments() {
     remove.textContent = 'close';
     chip.append(icon, name, length, remove);
     attachmentsEl.appendChild(chip);
+    if (a.source_type === 'image' && !a.uploading) {
+      const details = document.createElement('details');
+      details.className = 'w-full rounded-xl bg-surface-container px-3 py-2 text-xs text-on-surface';
+      const summary = document.createElement('summary');
+      summary.className = 'cursor-pointer font-medium';
+      summary.textContent = `核对 ${a.filename} 的识别文字（可修改）`;
+      const editor = document.createElement('textarea');
+      editor.className = 'mt-2 w-full min-h-28 max-h-48 overflow-y-auto rounded-lg border border-outline-variant/30 bg-surface-container-lowest p-2 text-sm';
+      editor.value = a.text;
+      editor.addEventListener('input', () => {
+        a.text = editor.value;
+        a.text_length = editor.value.length;
+        length.textContent = `${a.text_length}字`;
+      });
+      details.append(summary, editor);
+      attachmentsEl.appendChild(details);
+    }
   });
   attachmentsEl.querySelectorAll('.chip-remove').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -774,7 +791,7 @@ function clearAttachments() {
 
 async function uploadOne(file) {
   if (!ALLOWED_EXT.test(file.name)) {
-    alert(`不支持的文件类型：${file.name}\n支持：PDF / DOCX / TXT / MD`);
+    alert(`不支持的文件类型：${file.name}\n支持：PDF / DOCX / TXT / MD / JPG / PNG`);
     return;
   }
   if (file.size > MAX_SIZE) {
@@ -797,7 +814,7 @@ async function uploadOne(file) {
     }
     const data = await res.json();
     const idx = attachments.indexOf(placeholder);
-    if (idx !== -1) attachments[idx] = { filename: data.filename, text: data.text, text_length: data.text_length };
+    if (idx !== -1) attachments[idx] = { filename: data.filename, text: data.text, text_length: data.text_length, source_type: data.source_type };
     renderAttachments();
   } catch (e) {
     const idx = attachments.indexOf(placeholder);

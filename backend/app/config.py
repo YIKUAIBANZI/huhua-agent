@@ -20,7 +20,8 @@ class Settings(BaseSettings):
     # 结构化输出（Triage / editor / decoder / info-extractor）专用模型；
     # qwen3.6-plus 的 with_structured_output 太慢（~12s），这里切到更快的 qwen3-max
     LLM_STRUCTURED_MODEL: str = ""  # 空则回退到 LLM_MODEL
-    LLM_VISION_MODEL: str = "qwen-vl-plus"  # 用于 OCR 图片识别
+    # 空值按 API 地址选择 DeepSeek Flash / Qwen VL / OpenAI 视觉模型。
+    LLM_VISION_MODEL: str = ""
     LLM_BASE_URL: str | None = None  # DeepSeek 等自定义 base_url
     LLM_TEMPERATURE: float = 0.7
 

@@ -117,6 +117,7 @@ _all_paid_requests: deque[float] = deque()
 CHAT_WINDOW_SECONDS = 600
 CHAT_REQUEST_LIMIT = 80
 MATCH_REQUEST_LIMIT = 30
+UPLOAD_REQUEST_LIMIT = 30
 GLOBAL_REQUEST_LIMIT = 120
 
 
@@ -131,7 +132,7 @@ async def security_headers(request: Request, call_next):
 
             return JSONResponse(status_code=413, content={"detail": "文件超过 10MB 上限"})
     if (
-        request.url.path in {"/api/chat/stream", "/api/resume/match"}
+        request.url.path in {"/api/chat/stream", "/api/resume/match", "/api/chat/upload"}
         and request.method == "POST"
     ):
         # Uvicorn may rewrite request.client only for proxies it explicitly
@@ -144,11 +145,11 @@ async def security_headers(request: Request, call_next):
             timestamps.popleft()
         while _all_paid_requests and now - _all_paid_requests[0] > CHAT_WINDOW_SECONDS:
             _all_paid_requests.popleft()
-        limit = (
-            CHAT_REQUEST_LIMIT
-            if request.url.path == "/api/chat/stream"
-            else MATCH_REQUEST_LIMIT
-        )
+        limit = {
+            "/api/chat/stream": CHAT_REQUEST_LIMIT,
+            "/api/resume/match": MATCH_REQUEST_LIMIT,
+            "/api/chat/upload": UPLOAD_REQUEST_LIMIT,
+        }[request.url.path]
         if len(timestamps) >= limit or len(_all_paid_requests) >= GLOBAL_REQUEST_LIMIT:
             from fastapi.responses import JSONResponse
 
