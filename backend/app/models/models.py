@@ -39,3 +39,13 @@ class DecodeRecord(Base):
     decoded_result = Column(JSON, default=list)
     summary = Column(Text, default="")
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class ResumeSession(Base):
+    __tablename__ = "resume_sessions"
+
+    session_id = Column(String, primary_key=True)
+    resume_data = Column(JSON, default=dict, nullable=False)
+    resume_draft = Column(Text, default="", nullable=False)
+    stage = Column(String, default="", nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

@@ -218,6 +218,7 @@ def _process_xml(xml: str, collected: dict) -> str:
             new_texts[pos + 2] = tail[m.end() :]
 
     # 没有"泽熙信息"的变体：杭州市 + 科技有限公司...
+    company_occurrence = 0
     i = 0
     while i < len(texts) - 1:
         t0 = new_texts[i].strip()

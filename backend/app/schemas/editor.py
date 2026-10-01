@@ -1,4 +1,6 @@
-from pydantic import BaseModel
+from typing import Literal
+
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class BasicInfo(BaseModel):
@@ -46,6 +48,23 @@ class ProjectItem(BaseModel):
     polished_bullets: list[str] = []
 
 
+class ResumeSection(BaseModel):
+    id: str = Field(min_length=1, max_length=128)
+    kind: Literal[
+        "education", "work_experience", "projects", "skills",
+        "certificates", "self_evaluation", "custom",
+    ]
+    title: str = Field(max_length=100)
+    content: str = Field(default="", max_length=20000)
+
+    @field_validator("id")
+    @classmethod
+    def nonblank_id(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("section id must not be blank")
+        return value
+
+
 class ResumeData(BaseModel):
     basic_info: BasicInfo = BasicInfo()
     education: list[EducationItem] = []
@@ -60,6 +79,22 @@ class ResumeData(BaseModel):
     self_evaluation: str = ""
     # 经历 section 标题（校园经历 / 工作经历 / 过往经历），空则模板用默认
     experience_section_title: str = ""
+    # None 兼容旧简历默认栏目；空列表表示用户移除了全部正文栏目。
+    sections: list[ResumeSection] | None = Field(default=None, max_length=30)
+
+    @model_validator(mode="after")
+    def unique_sections(self) -> "ResumeData":
+        ids: set[str] = set()
+        builtin_kinds: set[str] = set()
+        for section in self.sections or []:
+            if section.id in ids:
+                raise ValueError("section ids must be unique")
+            ids.add(section.id)
+            if section.kind != "custom":
+                if section.kind in builtin_kinds:
+                    raise ValueError("builtin section kinds must be unique")
+                builtin_kinds.add(section.kind)
+        return self
 
 
 class GenerateRequest(BaseModel):

@@ -24,6 +24,8 @@ from langchain_core.messages import HumanMessage
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 
+from app.services.llm_compat import with_structured_output
+
 logger = logging.getLogger(__name__)
 
 TRIAGE_TIMEOUT_SECONDS = 15.0
@@ -131,7 +133,7 @@ async def run_triage(
     llm: ChatOpenAI,
 ) -> TriageDecision:
     """跑一次 Triage 决策。返回 TriageDecision 结构体。"""
-    structured_llm = llm.with_structured_output(TriageDecision)
+    structured_llm = with_structured_output(llm, TriageDecision)
     prompt = TRIAGE_SYSTEM.format(
         has_jd=has_jd,
         jd_skipped=jd_skipped,

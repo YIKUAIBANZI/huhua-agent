@@ -107,105 +107,100 @@
 </head>
 <body>
   <div class="header">
-    {% if basic_info.photo %}<div class="photo"><img src="{{ basic_info.photo|safe }}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;"></div>{% else %}<div class="photo">照片</div>{% endif %}
+    {% if basic_info.photo %}<div class="photo"><img src="{{ basic_info.photo }}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;"></div>{% else %}<div class="photo">照片</div>{% endif %}
     <div class="header-name-block">
-      <div class="header-name">{{ basic_info.name }}</div>
-      {% if basic_info.objective %}<div class="header-target">求职意向：{{ basic_info.objective }}</div>{% endif %}
+      <div class="header-name"><span data-field-path="/basic_info/name">{{ basic_info.name }}</span></div>
+      {% if basic_info.objective %}<div class="header-target">求职意向：<span data-field-path="/basic_info/objective">{{ basic_info.objective }}</span></div>{% endif %}
     </div>
     <div class="header-info">
-      {% if basic_info.birthday %}<div class="header-info-row"><span class="dot"></span><span class="lbl">出生年月</span>{{ basic_info.birthday }}</div>{% endif %}
-      {% if basic_info.ethnicity %}<div class="header-info-row"><span class="dot"></span><span class="lbl">民　族</span>{{ basic_info.ethnicity }}</div>{% endif %}
-      {% if basic_info.phone %}<div class="header-info-row"><span class="dot"></span><span class="lbl">电　话</span>{{ basic_info.phone }}</div>{% endif %}
-      {% if basic_info.email %}<div class="header-info-row"><span class="dot"></span><span class="lbl">邮　箱</span>{{ basic_info.email }}</div>{% endif %}
-      {% if education and education[0].school %}<div class="header-info-row"><span class="dot"></span><span class="lbl">毕业院校</span>{{ education[0].school }}</div>{% endif %}
-      {% if education and education[0].degree %}<div class="header-info-row"><span class="dot"></span><span class="lbl">学　历</span>{{ education[0].degree }}</div>{% endif %}
+      {% if basic_info.birthday %}<div class="header-info-row"><span class="dot"></span><span class="lbl">出生年月</span><span data-field-path="/basic_info/birthday">{{ basic_info.birthday }}</span></div>{% endif %}
+      {% if basic_info.ethnicity %}<div class="header-info-row"><span class="dot"></span><span class="lbl">民　族</span><span data-field-path="/basic_info/ethnicity">{{ basic_info.ethnicity }}</span></div>{% endif %}
+      {% if basic_info.phone %}<div class="header-info-row"><span class="dot"></span><span class="lbl">电　话</span><span data-field-path="/basic_info/phone">{{ basic_info.phone }}</span></div>{% endif %}
+      {% if basic_info.email %}<div class="header-info-row"><span class="dot"></span><span class="lbl">邮　箱</span><span data-field-path="/basic_info/email">{{ basic_info.email }}</span></div>{% endif %}
+      {% if has_education_section and education and education[0].school %}<div class="header-info-row"><span class="dot"></span><span class="lbl">毕业院校</span><span data-field-path="/education/0/school">{{ education[0].school }}</span></div>{% endif %}
+      {% if has_education_section and education and education[0].degree %}<div class="header-info-row"><span class="dot"></span><span class="lbl">学　历</span><span data-field-path="/education/0/degree">{{ education[0].degree }}</span></div>{% endif %}
     </div>
   </div>
 
   <div class="body">
-    {% if education %}
-    <div class="section">
-      <div class="section-title">教育背景</div>
-      {% for edu in education %}
+    {% for section in resume_sections %}
+{% if (section.kind == 'custom' and (section.title or section.content)) or (section.kind == 'education' and education) or (section.kind == 'work_experience' and work_experience) or (section.kind == 'projects' and projects) or (section.kind == 'skills' and (has_grouped_skills or skills)) or (section.kind == 'certificates' and certificates) or (section.kind == 'self_evaluation' and self_evaluation) %}
+  <div class="section">
+  {% if section.title %}
+  <div class="section-title"><span{% if section.title_path %} data-field-path="{{ section.title_path }}"{% endif %}>{{ section.title }}</span></div>
+  {% endif %}
+  {% if section.kind == 'education' %}
+      {% for edu in education %}{% set edu_index = loop.index0 %}
       <div class="item">
         <div class="item-header">
-          <span class="item-title">{{ edu.school }}　{{ edu.major }}{% if edu.degree %}（{{ edu.degree }}）{% endif %}</span>
-          <span class="item-date">{{ edu.start_date }}—{{ edu.end_date }}</span>
+          <span class="item-title"><span data-field-path="/education/{{ edu_index }}/school">{{ edu.school }}</span>　<span data-field-path="/education/{{ edu_index }}/major">{{ edu.major }}</span>{% if edu.degree %}（<span data-field-path="/education/{{ edu_index }}/degree">{{ edu.degree }}</span>）{% endif %}</span>
+          <span class="item-date"><span data-field-path="/education/{{ edu_index }}/start_date">{{ edu.start_date }}</span>—<span data-field-path="/education/{{ edu_index }}/end_date">{{ edu.end_date }}</span></span>
         </div>
         {% if edu.highlights %}
         <div class="item-sub">主修课程</div>
         <ul>
-          <li>{{ edu.highlights }}</li>
+          <li><span data-field-path="/education/{{ edu_index }}/highlights">{{ edu.highlights }}</span></li>
         </ul>
         {% endif %}
       </div>
       {% endfor %}
-    </div>
-    {% endif %}
 
-    {% if work_experience %}
-    <div class="section">
-      <div class="section-title">实习经历</div>
-      {% for job in work_experience %}
+  {% elif section.kind == 'work_experience' %}
+      {% for job in work_experience %}{% set job_index = loop.index0 %}
       <div class="item">
         <div class="item-header">
-          <span class="item-title">{{ job.company }}</span>
-          <span class="item-date">{{ job.start_date }}—{{ job.end_date }}</span>
+          <span class="item-title"><span data-field-path="/work_experience/{{ job_index }}/company">{{ job.company }}</span></span>
+          <span class="item-date"><span data-field-path="/work_experience/{{ job_index }}/start_date">{{ job.start_date }}</span>—<span data-field-path="/work_experience/{{ job_index }}/end_date">{{ job.end_date }}</span></span>
         </div>
-        {% if job.title %}<div class="item-sub">{{ job.title }}</div>{% endif %}
+        {% if job.title %}<div class="item-sub"><span data-field-path="/work_experience/{{ job_index }}/title">{{ job.title }}</span></div>{% endif %}
         {% if job.bullets %}
         <ul>
-          {% for b in job.bullets %}<li>{{ b }}</li>{% endfor %}
+          {% for b in job.bullets %}<li><span data-field-path="/work_experience/{{ job_index }}/bullets/{{ loop.index0 }}">{{ b }}</span></li>{% endfor %}
         </ul>
         {% endif %}
       </div>
       {% endfor %}
-    </div>
-    {% endif %}
 
-    {% if projects %}
-    <div class="section">
-      <div class="section-title">{{ experience_section_title or "项目经历" }}</div>
-      {% for p in projects %}
+  {% elif section.kind == 'projects' %}
+      {% for p in projects %}{% set p_index = loop.index0 %}
       <div class="item">
         <div class="item-header">
-          <span class="item-title">{{ p.name }}{% if p.role %}　{{ p.role }}{% endif %}</span>
-          <span class="item-date">{{ p.start_date }}—{{ p.end_date }}</span>
+          <span class="item-title"><span data-field-path="/projects/{{ p_index }}/name">{{ p.name }}</span>{% if p.role %}　<span data-field-path="/projects/{{ p_index }}/role">{{ p.role }}</span>{% endif %}</span>
+          <span class="item-date"><span data-field-path="/projects/{{ p_index }}/start_date">{{ p.start_date }}</span>—<span data-field-path="/projects/{{ p_index }}/end_date">{{ p.end_date }}</span></span>
         </div>
         {% if p.polished_bullets %}
-        <ul>{% for b in p.polished_bullets %}<li>{{ b }}</li>{% endfor %}</ul>
+        <ul>{% for b in p.polished_bullets %}<li><span data-field-path="/projects/{{ p_index }}/polished_bullets/{{ loop.index0 }}">{{ b }}</span></li>{% endfor %}</ul>
         {% elif p.description %}
-        <ul><li>{{ p.description }}</li></ul>
+        <ul><li><span data-field-path="/projects/{{ p_index }}/description">{{ p.description }}</span></li></ul>
         {% endif %}
       </div>
       {% endfor %}
-    </div>
-    {% endif %}
 
-    {% if skill_groups %}
-    <div class="section">
-      <div class="section-title">技能证书</div>
+  {% elif section.kind == 'skills' %}
+{% if has_grouped_skills %}
       <div>
         {% for group_name, items in skill_groups.items() %}
-        {% if items %}<div style="margin-bottom:4px;"><strong>{{ group_name }}：</strong>{{ items | join(' / ') }}</div>{% endif %}
+        {% if items %}<div style="margin-bottom:4px;"><strong><span data-field-path="/skill_groups/{{ group_name | pointer_escape }}" data-field-kind="group-name">{{ group_name }}</span>：</strong>{% for skill in items %}<span data-field-path="/skill_groups/{{ group_name | pointer_escape }}/{{ loop.index0 }}">{{ skill }}</span>{% if not loop.last %} / {% endif %}{% endfor %}</div>{% endif %}
         {% endfor %}
       </div>
-    </div>
     {% elif skills %}
-    <div class="section">
-      <div class="section-title">技能证书</div>
       <div class="info-grid">
-        {% for s in skills %}<div class="info-item">{{ s }}</div>{% endfor %}
+        {% for s in skills %}<div class="info-item"><span data-field-path="/skills/{{ loop.index0 }}">{{ s }}</span></div>{% endfor %}
       </div>
-    </div>
     {% endif %}
+  {% elif section.kind == 'certificates' %}
+  <div class="item"><ul>{% for certificate in certificates %}<li><span data-field-path="/certificates/{{ loop.index0 }}">{{ certificate }}</span></li>{% endfor %}</ul></div>
+  {% elif section.kind == 'self_evaluation' %}
+      <p class="desc"><span data-field-path="/self_evaluation">{{ self_evaluation }}</span></p>
 
-    {% if self_evaluation %}
-    <div class="section">
-      <div class="section-title">自我评价</div>
-      <p class="desc">{{ self_evaluation }}</p>
-    </div>
-    {% endif %}
+  {% elif section.kind == 'custom' %}
+  {% if section.content %}
+  <p class="desc" style="white-space:pre-line;"><span{% if section.content_path %} data-field-path="{{ section.content_path }}"{% endif %}>{{ section.content }}</span></p>
+  {% endif %}
+  {% endif %}
+  </div>
+{% endif %}
+{% endfor %}
   </div>
 </body>
 </html>

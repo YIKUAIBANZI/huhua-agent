@@ -14,6 +14,8 @@ from typing import Any
 from docx import Document
 from docx.shared import Inches, Pt
 
+from app.services.resume_sections import get_resume_sections
+
 logger = logging.getLogger(__name__)
 
 
@@ -30,6 +32,8 @@ def _decode_photo_data_url(data_url: str) -> bytes | None:
 
 
 def _add_section_heading(doc, text: str) -> None:
+    if not text:
+        return
     p = doc.add_paragraph()
     run = p.add_run(text)
     run.bold = True
@@ -105,9 +109,28 @@ def resume_data_to_docx(data: dict[str, Any]) -> bytes:
     if opt_parts:
         doc.add_paragraph(" | ".join(opt_parts))
 
-    # 教育
-    if data.get("education"):
-        _add_section_heading(doc, "教育背景")
+    # 预览与 Word 共享栏目顺序、标题与可见性；正文仍取原有字段。
+    for resume_section in get_resume_sections(data):
+        kind = resume_section["kind"]
+        if kind == "custom":
+            has_content = bool(resume_section["title"] or resume_section["content"])
+        elif kind == "skills":
+            has_content = any((data.get("skill_groups") or {}).values()) or bool(data.get("skills"))
+        else:
+            has_content = bool(data.get(kind))
+        if not has_content:
+            continue
+        _add_section_heading(doc, resume_section["title"])
+        _add_section_body(doc, data, resume_section)
+
+    buf = io.BytesIO()
+    doc.save(buf)
+    return buf.getvalue()
+
+
+def _add_section_body(doc, data: dict[str, Any], section: dict[str, Any]) -> None:
+    kind = section["kind"]
+    if kind == "education":
         for edu in data["education"]:
             line = " / ".join(
                 x
@@ -124,12 +147,7 @@ def resume_data_to_docx(data: dict[str, Any]) -> bytes:
             if edu.get("highlights"):
                 doc.add_paragraph(edu["highlights"])
 
-    # 经历（projects + work_experience 合并）
-    section_title = data.get("experience_section_title") or "经历"
-    has_exp = data.get("projects") or data.get("work_experience")
-    if has_exp:
-        _add_section_heading(doc, section_title)
-        # 工作/实习
+    elif kind == "work_experience":
         for job in data.get("work_experience") or []:
             line = " / ".join(
                 x
@@ -144,7 +162,7 @@ def resume_data_to_docx(data: dict[str, Any]) -> bytes:
             p.add_run(line).bold = True
             for b in job.get("bullets") or []:
                 doc.add_paragraph(b, style="List Bullet")
-        # 项目
+    elif kind == "projects":
         for proj in data.get("projects") or []:
             line = " / ".join(
                 x
@@ -166,29 +184,26 @@ def resume_data_to_docx(data: dict[str, Any]) -> bytes:
             elif proj.get("description"):
                 doc.add_paragraph(proj["description"])
 
-    # 技能（skill_groups 优先，fallback 到 flat skills）
-    skill_groups = data.get("skill_groups") or {}
-    if skill_groups and any(v for v in skill_groups.values()):
-        _add_section_heading(doc, "技能证书")
-        for group_name, items in skill_groups.items():
-            if items:
-                p = doc.add_paragraph()
-                p.add_run(f"{group_name}：").bold = True
-                p.add_run(" / ".join(items))
-    elif data.get("skills"):
-        _add_section_heading(doc, "技能证书")
-        for s in data["skills"]:
-            doc.add_paragraph(s, style="List Bullet")
+    elif kind == "skills":
+        # 分组技能优先，fallback 到 flat skills。
+        skill_groups = data.get("skill_groups") or {}
+        if skill_groups and any(skill_groups.values()):
+            for group_name, items in skill_groups.items():
+                if items:
+                    p = doc.add_paragraph()
+                    p.add_run(f"{group_name}：").bold = True
+                    p.add_run(" / ".join(items))
+        else:
+            for skill in data.get("skills") or []:
+                doc.add_paragraph(skill, style="List Bullet")
 
-    if data.get("certificates"):
-        _add_section_heading(doc, "证书")
+    elif kind == "certificates":
         for c in data["certificates"]:
             doc.add_paragraph(c, style="List Bullet")
-
-    if data.get("self_evaluation"):
-        _add_section_heading(doc, "自我评价")
+    elif kind == "self_evaluation":
         doc.add_paragraph(data["self_evaluation"])
-
-    buf = io.BytesIO()
-    doc.save(buf)
-    return buf.getvalue()
+    elif kind == "custom":
+        # add_paragraph treats HTML as literal text; each authored line is retained.
+        if section["content"]:
+            for line in section["content"].replace("\r\n", "\n").replace("\r", "\n").split("\n"):
+                doc.add_paragraph(line)
