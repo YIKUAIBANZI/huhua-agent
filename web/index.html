@@ -270,7 +270,7 @@ const inputEl = document.getElementById('input');
 function updateInputPlaceholder() {
   inputEl.placeholder = window.matchMedia('(max-width: 640px)').matches
     ? '贴 JD，或说说你的经历'
-    : '输入消息，Enter 发送 · 可粘贴或拖入 PDF/DOCX/TXT/MD';
+    : '输入消息，Enter 发送 · 可粘贴或拖入 PDF/DOCX/JPG/PNG';
 }
 updateInputPlaceholder();
 window.addEventListener('resize', updateInputPlaceholder);
@@ -820,7 +820,10 @@ async function uploadOne(file) {
     const idx = attachments.indexOf(placeholder);
     if (idx !== -1) attachments.splice(idx, 1);
     renderAttachments();
-    alert(`上传失败：${e.message}`);
+    const message = e instanceof TypeError
+      ? '暂时无法连接到服务，请稍后刷新页面重试'
+      : e.message;
+    alert(`上传失败：${message}`);
   } finally {
     pendingUploads--;
   }
