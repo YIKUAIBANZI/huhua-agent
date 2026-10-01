@@ -227,6 +227,38 @@ def _guess_project_name(text: str) -> str:
     return m.group(1) if m else ""
 
 
+def _snippet_matches_experience(snippet: str, experience: dict) -> bool:
+    """Match a snippet to one experience, never by shared dates or skills."""
+    identity = experience.get("name") or experience.get("company")
+    if identity:
+        # A one-letter project such as "A" must not match "FastAPI".
+        return bool(
+            _re.search(
+                rf"(?<![A-Za-z0-9_]){_re.escape(identity)}(?![A-Za-z0-9_])",
+                snippet,
+                flags=_re.IGNORECASE,
+            )
+        )
+    description = experience.get("raw_description") or experience.get("description", "")
+    if not description:
+        description = "\n".join(experience.get("bullets") or [])
+    # Unnamed experiences need an actual action sentence, not a common short label.
+    return any(
+        len(clause.strip()) >= 12 and clause.strip() in snippet
+        for clause in _re.split(r"[,，。；;\n]", description)
+    )
+
+
+def _snippet_was_extracted(previous: dict, collected: dict, snippet: str) -> bool:
+    """Skip the raw fallback only for an experience handled by this extraction."""
+    return any(
+        experience not in previous.get(section, [])
+        and _snippet_matches_experience(snippet, experience)
+        for section in ("projects", "work_experience", "internship")
+        for experience in collected.get(section, [])
+    )
+
+
 def _upsert_project_experience(
     collected: dict,
     project_name: str,
@@ -803,6 +835,7 @@ async def collecting_node(state: ResumeState, llm: ChatOpenAI) -> dict:
     """阶段2：收集用户经历。由 Triage 决定走哪条分支（WRAP / ASK_EXP / SUGGEST / READY_TO_BUILD）。"""
     messages = state["messages"]
     collected = state.get("collected_info") or _empty_collected_info()
+    previous_collected = collected
 
     last_human = next(
         (m.content for m in reversed(messages) if isinstance(m, HumanMessage)), ""
@@ -877,13 +910,22 @@ async def collecting_node(state: ResumeState, llm: ChatOpenAI) -> dict:
         response = await llm.ainvoke([sys_msg] + messages)
 
         # 只保存用户原话。面向用户的包装建议可能包含模型推断，不能当成事实写入简历。
-        project_name = _guess_project_name(snippet) or "对话产出经历"
-        _upsert_project_experience(
-            collected=collected,
-            project_name=project_name,
-            description=snippet,
-            raw_snippet=snippet,
-        )
+        if not _snippet_was_extracted(previous_collected, collected, snippet):
+            project_name = next(
+                (
+                    project["name"]
+                    for project in collected.get("projects", [])
+                    if project.get("name")
+                    and _snippet_matches_experience(snippet, project)
+                ),
+                "",
+            ) or _guess_project_name(snippet) or "对话产出经历"
+            _upsert_project_experience(
+                collected=collected,
+                project_name=project_name,
+                description=snippet,
+                raw_snippet=snippet,
+            )
         base_update["collected_info"] = collected
 
         base_update["messages"] = [response]

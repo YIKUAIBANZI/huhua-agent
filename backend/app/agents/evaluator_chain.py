@@ -11,6 +11,7 @@ from tenacity import (
 
 from app.agents.prompts import EVALUATOR_PROMPT
 from app.schemas.evaluator import EvaluateResponse
+from app.services.llm_compat import with_structured_output
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +66,7 @@ async def run_evaluator_chain(
 
     # 尝试结构化输出
     try:
-        structured_llm = llm.with_structured_output(EvaluateResponse)
+        structured_llm = with_structured_output(llm, EvaluateResponse)
         chain = EVALUATOR_PROMPT | structured_llm
         result = await chain.ainvoke(prompt_vars)
         return result.model_dump()

@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     ENABLE_RAG: bool = False
 
     model_config = {
-        "env_file": ".env",
+        "env_file": str(BACKEND_DIR / ".env"),
         "env_file_encoding": "utf-8",
         "extra": "ignore",
     }

@@ -12,7 +12,7 @@ from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
-os.environ.pop("LLM_API_KEY", None)
+os.environ["LLM_API_KEY"] = ""  # Override local credentials; no live model calls in this suite.
 
 from fastapi.testclient import TestClient  # noqa: E402
 import main  # noqa: E402

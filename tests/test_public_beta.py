@@ -6,7 +6,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
-os.environ.pop("LLM_API_KEY", None)
+# Explicitly override local .env credentials; this suite must never call a live model.
+os.environ["LLM_API_KEY"] = ""
 
 from fastapi.testclient import TestClient  # noqa: E402
 from main import app  # noqa: E402

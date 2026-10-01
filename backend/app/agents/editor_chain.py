@@ -18,6 +18,8 @@ from langchain_core.messages import HumanMessage
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 
+from app.services.llm_compat import with_structured_output
+
 logger = logging.getLogger(__name__)
 
 EDITOR_TIMEOUT_SECONDS = 15.0
@@ -129,7 +131,7 @@ async def run_editor(resume_data: dict, llm: ChatOpenAI) -> dict:
     """
     import json as _json
 
-    structured_llm = llm.with_structured_output(EditorOutput)
+    structured_llm = with_structured_output(llm, EditorOutput)
     prompt = EDITOR_SYSTEM.format(
         resume_json=_json.dumps(resume_data, ensure_ascii=False, indent=2)
     )

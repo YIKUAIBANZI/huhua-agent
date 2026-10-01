@@ -63,6 +63,8 @@ open http://127.0.0.1:8765/
 
 如果使用 DeepSeek，在 `backend/.env` 中设置 `LLM_PROVIDER=deepseek`、`LLM_BASE_URL=https://api.deepseek.com`、`LLM_MODEL=deepseek-flash`、`LLM_STRUCTURED_MODEL=deepseek-flash`，并填写新生成的 `LLM_API_KEY`。`LLM_VISION_MODEL` 可留空，图片识别会自动使用 `deepseek-flash`。请勿把密钥提交到仓库或贴进聊天。
 
+服务固定读取本项目的 `backend/.env`，不受启动目录影响；环境变量优先于该文件。修改配置后需要重启服务。DeepSeek 的 Triage、编辑与评估结构化调用使用工具调用，并单独关闭思考模式，以适配其接口格式。
+
 运行回归检查：
 
 ```bash
@@ -70,6 +72,8 @@ open http://127.0.0.1:8765/
 ```
 
 GitHub PR 会自动运行同一套测试。`JEV_API_KEY` 是可选配置；Jev 接口只发送从 JD 和简历抽出的能力标签，不发送姓名、联系方式、学校、公司或完整对话。参考分是当前简历的证据覆盖提示，不代表招聘系统评分或录用概率。
+
+这套自动化测试会显式将模型密钥设为空值，模型请求使用离线替身，不会消耗本地配置的模型额度。真实模型连通与生成流程需要另行验证。
 
 模板编辑页位于 `/resume`，从当前聊天会话读取简历；没有会话简历时显示样例。此页的修改保留在当前页面，切换模板不会丢失，导出使用最新输入；刷新会重新读取会话数据，尚不回写聊天。
 
