@@ -15,7 +15,7 @@ async (page) => {
   await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   await page.mouse.move(10, 10);
   check(await input('/basic_info/name').count() === 1, '表单加载');
-  check(await preview('/experience_section_title').textContent() === '项目经历', '默认栏目标题');
+  check(await preview('/sections/2/title').textContent() === '项目经历', '默认栏目标题');
 
   // Playwright OOPIF coordinates omit ancestor CSS transforms. Use the visible
   // iframe bounds and the observed child rect for actual mouse hit testing.
@@ -59,7 +59,7 @@ async (page) => {
   await page.getByRole('button', {name: '＋ 添加工作 / 实习经历', exact: true}).click();
   await input('/work_experience/1/company').fill('新公司');
   await input('/work_experience/1/bullets/0').fill('新经历要点');
-  const workSection = page.locator('.edit-section').filter({has: page.locator('summary', {hasText: '工作 / 实习经历'})});
+  const workSection = page.locator('.edit-section').filter({has: page.locator('.section-caption', {hasText: /^实习经历$/})});
   await workSection.getByRole('button', {name: '删除', exact: true}).first().click();
   await input('/work_experience/0/company').fill('删除首项后的新公司');
   await settled();
@@ -67,7 +67,7 @@ async (page) => {
   check(await preview('/work_experience/0/bullets/0').textContent() === '新经历要点', '增删后保留正确内容');
 
   await page.getByRole('button', {name: '＋ 添加项目', exact: true}).click();
-  const projectsSection = page.locator('.edit-section').filter({has: page.locator('summary', {hasText: /^项目经历$/})});
+  const projectsSection = page.locator('.edit-section').filter({has: page.locator('.section-caption', {hasText: /^项目经历$/})});
   await projectsSection.getByRole('button', {name: '改为分条要点', exact: true}).last().click();
   await input('/projects/1/polished_bullets/0').fill('新项目第一条');
   await projectsSection.getByRole('button', {name: '改为整段描述', exact: true}).last().click();

@@ -16,6 +16,7 @@ AI 简历对话工作台：聊天收集真实经历 → 针对岗位整理 → �
 - **可选 Jev 参考分**：用户主动点击后，根据已识别的 JD 要求与简历能力证据给出参考覆盖分；未配置 `JEV_API_KEY` 时不显示入口
 - **6 款模板**：简约单栏 / 深蓝横幅 / 灰条夹页 / 浅蓝斜切 / 浅蓝色块 / 淡青平行
 - **实时表单编辑**：右侧按栏目填写，输入立即更新 A4 预览；悬停文字显示虚线框并高亮对应输入框，点击可定位编辑。支持增删经历、要点与技能分组
+- **自定义栏目**：拖动栏目把手排序，或用上移/下移按钮；可修改标题、删除与撤销，也可添加自定义标题和多行正文。自定义标题留空时只显示正文；六款模板与 PDF / Word 都遵循当前栏目顺序
 - **头像上传**：base64 内嵌，DOCX 导出也会带图
 - **导出**：所选模板由浏览器打印成 PDF；Word 使用统一排版，便于继续编辑
 
@@ -77,9 +78,10 @@ GitHub PR 会自动运行同一套测试。`JEV_API_KEY` 是可选配置；Jev �
 ```bash
 playwright-cli -s=huhua-editor open http://127.0.0.1:8765/resume
 playwright-cli -s=huhua-editor run-code --filename=tests/resume_editor.browser.js
+playwright-cli -s=huhua-editor run-code --filename=tests/resume_sections.browser.js
 ```
 
-该检查覆盖悬停与定位、连续输入和慢请求、增删后的字段对应、技能分组、六款模板、最新内容导出及手机布局。普通导出不包含编辑脚本或高亮样式。
+检查覆盖悬停与定位、连续输入和慢请求、增删后的字段对应、技能分组、原生栏目拖拽/改名/撤销、自定义正文、六款模板、最新内容导出及手机布局。普通导出不包含编辑脚本或高亮样式。
 
 ## 公开 beta
 
@@ -99,7 +101,7 @@ backend/
   app/
     agents/           # triage / wrapper / decoder / editor / resume_graph
     api/              # chat.py / resume.py
-    services/         # renderer.py（Jinja2）/ file_extractor.py（PDF/DOCX 解析）/ image_ocr.py（截图转写）
+    services/         # renderer.py（Jinja2）/ resume_sections.py（栏目顺序）/ file_extractor.py / image_ocr.py
     schemas/          # ResumeData / BasicInfo 等 pydantic
     tools/            # resume_data_docx.py（结构化 → Word）
   main.py

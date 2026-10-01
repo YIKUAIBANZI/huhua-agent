@@ -107,5 +107,8 @@
   window.addEventListener('load', scheduleHeight);
   window.addEventListener('resize', scheduleHeight);
   document.fonts?.ready.then(scheduleHeight);
-  scheduleHeight();
+  // Mobile editing hides the iframe. Hidden frames may pause animation frames,
+  // so acknowledge the loaded document immediately; resize/font events refine
+  // its natural height when the preview becomes visible again.
+  reportHeight();
 })();

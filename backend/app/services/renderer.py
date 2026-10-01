@@ -6,6 +6,8 @@ from typing import Any
 
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound, select_autoescape
 
+from app.services.resume_sections import get_resume_sections
+
 ROOT = Path(__file__).resolve().parents[3]
 TEMPLATE_DIR = ROOT / "data" / "jianlimoban" / "html-template"
 
@@ -44,7 +46,14 @@ def render_resume(template_id: str, data: dict[str, Any], interactive: bool = Fa
     photo = basic.get("photo")
     if not isinstance(photo, str) or len(photo) > _MAX_PHOTO_URL_LENGTH or not _PHOTO_DATA_URL.fullmatch(photo):
         basic["photo"] = ""
-    html = template.render(**{**data, "basic_info": basic})
+    sections = get_resume_sections(data)
+    html = template.render(**{
+        **data,
+        "basic_info": basic,
+        "resume_sections": sections,
+        "has_education_section": any(section["kind"] == "education" for section in sections),
+        "has_grouped_skills": any((data.get("skill_groups") or {}).values()),
+    })
     if interactive:
         # Only our static bridge is executable; resume values still use Jinja autoescape.
         html = html.replace("</body>", '<script src="/static/resume-preview.js"></script>\n</body>')
